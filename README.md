@@ -1,7 +1,10 @@
 <div align="center">
   <h1>⚡ CodeSync Pro</h1>
-  <img src="icons/logo.png" width="220" alt="CodeSync Pro Logo" />
+  <img src="logo.png" width="220" alt="CodeSync Pro Logo" />
   <p><b>An enterprise-grade, secure, and fully automated browser extension that synchronizes your competitive programming and algorithmic solutions from Codeforces, AtCoder, and LeetCode directly to a GitHub repository of your choice.</b></p>
+  <br>
+  <img src="UI1.png" width="280" alt="CodeSync Pro Interface - Unconfigured" />
+  <img src="UI2.png" width="280" alt="CodeSync Pro Interface - Active Dashboard" />
 </div>
 
 ---
