@@ -228,7 +228,7 @@ CodeSync Pro uses Chrome's secure storage area (`chrome.storage.local`) to store
 ### 1. Configuration Database Schema (`syncConfig`)
 ```json
 {
-  "ghUsername": "parthopaul69",
+  "ghUsername": "xxxxxxxxxxx",
   "ghRepo": "CP-Solutions",
   "ghToken": "ZXlKaGJHY2lPaUpTVXpJMU5pSj...",
   "cfHandle": "xxxxxxxxxx",
