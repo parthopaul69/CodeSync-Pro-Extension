@@ -8,7 +8,7 @@
 
 <p align="center">
   <strong>The All-in-One Competitive Programming Workstation & Automated GitHub Synchronization Engine</strong><br>
-  <em>Code, test, debug, upsolve, and archive your solutions seamlessly across Codeforces, AtCoder, LeetCode, and Toph.</em>
+  <em>Code, test, debug, upsolve, and archive your solutions seamlessly in all programming languages across Codeforces, AtCoder, LeetCode, and Toph.</em>
 </p>
 
 <p align="center">
@@ -174,7 +174,7 @@ The primary execution controls provide instant tactile feedback for competitive 
 </p>
 
 Customize and command your coding environment:
-- **Language Standards Dropdown:** Select from modern compiler standards including **C++23 (Latest GCC 14.1)**, **C++20**, **C++17**, **Python 3.13**, **Java 21**, **Rust 1.85**, **Go 1.23**, and **Node.js 22**.
+- **Universal Multi-Language Standards:** Native execution and syntax highlighting for **all programming languages** including modern standards: **C++23 (Latest GCC 14.1)**, **C++20**, **C++17**, **Python 3.13 / 3.12 / PyPy**, **Java 21**, **Rust 1.85**, **Go 1.23**, **Node.js 22 / TypeScript**, **Kotlin**, **C#**, **Ruby**, **Swift**, **C**, **PHP**, **Haskell**, and 35+ more.
 - **Theme Dropdown:** Instant bidirectional switching between **VS Code Dark+**, **Dracula**, **One Dark Pro**, **GitHub Dark**, **Monokai**, and **Catppuccin Mocha**.
 - **⚡ Format Button:** Intelligent code formatting enforcing clean 4-space indentation while strictly shielding ASCII art headers, block comments, and string literals from corruption. Shortcut: `Alt+Shift+F`.
 - **⚡ Snippets Button:** Opens the Algorithmic Snippets drawer containing pre-built templates for Fast I/O, Modular Exponentiation, DSU, Segment Trees, and Sieve algorithms.
@@ -346,7 +346,7 @@ Seamless GitHub portfolio synchronization setup:
 
 Personalize your IDE workstation:
 - **Default Editor Theme:** Choose from VS Code Dark+, Dracula, One Dark Pro, GitHub Dark, Monokai, and Catppuccin Mocha.
-- **Default Language:** Set your preferred default standard (C++, Python, Java, Rust, Go).
+- **Default Language:** Set your default language among all supported standards (C++, Python, Java, Rust, Go, JavaScript, TypeScript, Kotlin, C#, Ruby, Swift, C, PHP, Haskell, and 35+ more).
 - **Editor Font Size Slider:** Granular font sizing from 12px to 24px with live updating.
 - **Vim Mode Toggle:** Enable authentic modal Vim keybindings inside the Monaco editor.
 - **Play Sound on Sync:** Audio chimes for sync successes and verdict notifications.
@@ -451,7 +451,7 @@ This directory exhaustively details every button, dropdown, and control built in
 | **Test (Run) Button** | `▶ Test (Run)` | Topbar Right | Compiles and executes code against **all testcases** in the right panel. Measures wall-clock runtime in milliseconds and memory usage. Shortcut: `Ctrl+Enter` or `Cmd+Enter`. |
 | **Submit Button** | `🚀 Submit` | Topbar Right | Submits the solution directly into the active judge tab's submission form. If direct form injection is unavailable, copies code to clipboard with a toast notification. |
 | **Theme Selector** | `VS Code Dark ▾` | Topbar Center | Dropdown offering 6 themes: **VS Code Dark+**, **Dracula**, **One Dark Pro**, **GitHub Dark**, **Monokai**, and **Catppuccin Mocha**. Propagates across tabs instantly. |
-| **Language Selector** | `C++23 (Latest GCC 14.1) ▾` | Topbar Center | Downward menu selecting compiler standards: **C++23**, **C++20**, **C++17**, **Python 3.13**, **Python 3.12**, **Java 21**, **Rust 1.85**, **Go 1.23**, **Node.js 22**, etc. |
+| **Language Selector** | `C++23 (Latest GCC 14.1) ▾` | Topbar Center | Downward menu selecting compiler standards: Universal support for **all programming languages** (C++, Python, Java, Rust, Go, JavaScript, TypeScript, Kotlin, C#, Ruby, Swift, C, PHP, Haskell, and 35+ more). |
 | **Format Button** | `⚡ Format` | Topbar Center | Formats code with 4-space indentation and operator padding while **shielding ASCII art comments, block comments, and string literals** from corruption. Shortcut: `Alt+Shift+F`. |
 | **Snippets Button** | `⚡ Snippets` | Topbar Center | Opens the Algorithmic Snippets drawer containing pre-built competitive programming templates (Fast I/O, Modular Arithmetic, DSU, Segment Tree, Sieve). |
 | **Audio Notification** | `🔔` (Bell Icon) | Topbar Center | Toggles sound effects for Accepted verdicts and test completion. Stored in local settings. |
@@ -614,6 +614,7 @@ your-repo/
 
 - **Commit Metadata:** Every commit includes problem title, contest ID, rating, runtime, memory, and direct problem link.
 - **Self-Documenting READMEs:** Auto-generates clean Markdown problem descriptions inside each problem folder.
+- **Universal Multi-Language Auto-Sync:** Automatically detects the submission language and maps appropriate source file extensions (<code>.cpp</code>, <code>.py</code>, <code>.java</code>, <code>.rs</code>, <code>.go</code>, <code>.js</code>, <code>.ts</code>, <code>.kt</code>, <code>.cs</code>, <code>.rb</code>, <code>.swift</code>, <code>.c</code>, <code>.php</code>, <code>.hs</code>, <code>.scala</code>, <code>.dart</code>, and 35+ more).
 
 ---
 
@@ -705,8 +706,8 @@ git clone https://github.com/imposter-bho0/codesync-pro.git
 ## ❓ Frequently Asked Questions (FAQ)
 
 <details>
-<summary><strong>Does CodeSync Pro support multiple languages?</strong></summary>
-Yes! CodeSync Pro supports C++ (C++23, C++20, C++17), Python (Python 3.13, 3.12), Java 21, Rust 1.85, Go 1.23, and Node.js JavaScript.
+<summary><strong>Does CodeSync Pro support all programming languages?</strong></summary>
+<strong>Yes, 100%!</strong> CodeSync Pro provides universal support for all programming languages. Whether you code in C++, Python, Java, Rust, Go, JavaScript, TypeScript, Kotlin, C#, Ruby, Swift, C, PHP, Haskell, Scala, Dart, Perl, Pascal, Bash, or any other language across Codeforces, AtCoder, LeetCode, and Toph, CodeSync Pro executes, formats, and automatically archives your code to your GitHub repository with appropriate language-specific file extensions (<code>.cpp</code>, <code>.py</code>, <code>.java</code>, <code>.rs</code>, <code>.go</code>, <code>.js</code>, <code>.ts</code>, <code>.kt</code>, <code>.cs</code>, <code>.rb</code>, <code>.swift</code>, etc.) and complete documentation.
 </details>
 
 <details>
