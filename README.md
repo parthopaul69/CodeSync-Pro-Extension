@@ -31,10 +31,11 @@
     - [A. Full Monaco Workstation Studio (`ide_full_workspace.png`)](#a-full-monaco-workstation-studio-ide_full_workspacepng)
     - [B. Primary Action Controls (`ide_action_buttons.png`)](#b-primary-action-controls-ide_action_buttonspng)
     - [C. Editor Standards & Toolbar (`ide_toolbar_controls.png`)](#c-editor-standards--toolbar-ide_toolbar_controlspng)
-    - [D. Authentic VS Code Monaco Experience (`ide_monaco_editor.png`)](#d-authentic-vs-code-monaco-experience-ide_monaco_editorpng)
-    - [E. LeetCode-Style Problem Statement Viewer (`ide_problem_statement_viewer.png`)](#e-leetcode-style-problem-statement-viewer-ide_problem_statement_viewerpng)
-    - [F. Problem Panel in Standalone Scratchpad Mode (`ide_problem_panel_standalone.png`)](#f-problem-panel-in-standalone-scratchpad-mode-ide_problem_panel_standalonepng)
-    - [G. CPH Multi-Testcase Runner & Accepted Banner (`ide_testcase_accepted_verdict.png`)](#g-cph-multi-testcase-runner--accepted-banner-ide_testcase_accepted_verdictpng)
+    - [D. Compiler Standards & Multi-Language Selector (`ide_language_selector_dropdown.png`)](#d-compiler-standards--multi-language-selector-ide_language_selector_dropdownpng)
+    - [E. Authentic VS Code Monaco Experience (`ide_monaco_editor.png`)](#e-authentic-vs-code-monaco-experience-ide_monaco_editorpng)
+    - [F. LeetCode-Style Problem Statement Viewer (`ide_problem_statement_viewer.png`)](#f-leetcode-style-problem-statement-viewer-ide_problem_statement_viewerpng)
+    - [G. Problem Panel in Standalone Scratchpad Mode (`ide_problem_panel_standalone.png`)](#g-problem-panel-in-standalone-scratchpad-mode-ide_problem_panel_standalonepng)
+    - [H. CPH Multi-Testcase Runner & Accepted Banner (`ide_testcase_accepted_verdict.png`)](#h-cph-multi-testcase-runner--accepted-banner-ide_testcase_accepted_verdictpng)
   - [2. Extension Popup Dashboard & Live Analytics](#2-extension-popup-dashboard--live-analytics)
     - [A. Popup Quick Navigation (`popup_navigation_buttons.png`)](#a-popup-quick-navigation-popup_navigation_buttonspng)
     - [B. Honest Streak & Platform Solves Donut (`popup_streak_and_donut.png`)](#b-honest-streak--platform-solves-donut-popup_streak_and_donutpng)
@@ -115,6 +116,7 @@ The table below catalogs every graphic asset utilized in this documentation:
 | `assets/ide_full_workspace.png` | **Full Monaco CP Workstation** | Panoramic 3-column competitive programming studio. |
 | `assets/ide_action_buttons.png` | **IDE Primary Action Controls** | Tactile Compile, Test (Run), and Submit control group. |
 | `assets/ide_toolbar_controls.png` | **IDE Standards & Toolbar** | Language standard, Monaco theme, Format, and Snippet selectors. |
+| `assets/ide_language_selector_dropdown.png` | **Multi-Language Selector Dropdown** | Dropdown menu displaying all 11 native compiler standards (C++23/20/17, Python 3.13/3.12, Java 21/17, Rust 1.85, Go 1.23, JS Node 22, Kotlin 2.1, C# .NET 8). |
 | `assets/ide_monaco_editor.png` | **Monaco Code Editor Panel** | Authentic VS Code Dark+ engine with full AST syntax colors. |
 | `assets/ide_problem_statement_viewer.png` | **Problem Statement Viewer** | LeetCode-style problem layout with difficulty pill and styled examples. |
 | `assets/ide_problem_panel_standalone.png` | **Problem Panel Standalone Mode** | Clean scratchpad interface with instant jump links to 4 judges. |
@@ -181,7 +183,31 @@ Customize and command your coding environment:
 
 ---
 
-#### D. Authentic VS Code Monaco Experience (`ide_monaco_editor.png`)
+#### D. Compiler Standards & Multi-Language Selector (`ide_language_selector_dropdown.png`)
+
+<p align="center">
+  <img src="assets/ide_language_selector_dropdown.png" alt="Compiler Standards & Multi-Language Selector" width="380" />
+</p>
+
+CodeSync Pro features an integrated multi-compiler selector with native environments pre-configured for modern competitive programming:
+- **C++23 (Latest GCC 14.1):** Modern C++ standard with bleeding-edge GCC 14.1 compiler optimizations and full standard library access.
+- **C++20 (GCC 14.1):** Concept-constrained templates, ranges, `std::span`, and formatting utilities.
+- **C++17 (GCC 11.1):** The universal contest programming baseline with structured bindings and `std::optional`.
+- **Python 3.13 (Latest):** Latest Python release with enhanced interpreter performance and standard libraries.
+- **Python 3.12:** Proven high-stability runtime matching major online judges.
+- **Java 21 / 17 (OpenJDK):** Modern LTS OpenJDK runtimes with fast buffer streaming support.
+- **Rust 1.85 (Latest):** Modern Rust with zero-cost abstractions, pattern matching, and high-performance memory safety.
+- **Go 1.23 (Latest):** Blazing fast compilation and clean concurrency models.
+- **JavaScript (Node 22):** High-speed V8 JavaScript execution with modern ECMAScript features.
+- **Kotlin 2.1:** Modern concise JVM language with fast I/O reader boilerplates.
+- **C# (.NET 8):** Enterprise-grade C# with modern LINQ and strongly-typed execution.
+
+> [!NOTE]
+> In addition to these 11 built-in execution standards, CodeSync Pro's automated GitHub sync engine supports **all programming languages** (35+ file extensions including Ruby, Swift, PHP, Haskell, Scala, Dart, Perl, Pascal, Bash, and more).
+
+---
+
+#### E. Authentic VS Code Monaco Experience (`ide_monaco_editor.png`)
 
 <p align="center">
   <img src="assets/ide_monaco_editor.png" alt="Authentic VS Code Monaco Experience" width="90%" />
@@ -194,7 +220,7 @@ Experience the exact editing feel of desktop Visual Studio Code inside your brow
 
 ---
 
-#### E. LeetCode-Style Problem Statement Viewer (`ide_problem_statement_viewer.png`)
+#### F. LeetCode-Style Problem Statement Viewer (`ide_problem_statement_viewer.png`)
 
 <p align="center">
   <img src="assets/ide_problem_statement_viewer.png" alt="LeetCode-Style Problem Statement Viewer" width="90%" />
@@ -207,7 +233,7 @@ Extracted problem statements are rendered with clean modern typography:
 
 ---
 
-#### F. Problem Panel in Standalone Scratchpad Mode (`ide_problem_panel_standalone.png`)
+#### G. Problem Panel in Standalone Scratchpad Mode (`ide_problem_panel_standalone.png`)
 
 <p align="center">
   <img src="assets/ide_problem_panel_standalone.png" alt="Problem Panel in Standalone Mode" width="45%" />
@@ -220,7 +246,7 @@ When launched independently without an active problem tab:
 
 ---
 
-#### G. CPH Multi-Testcase Runner & Accepted Banner (`ide_testcase_accepted_verdict.png`)
+#### H. CPH Multi-Testcase Runner & Accepted Banner (`ide_testcase_accepted_verdict.png`)
 
 <p align="center">
   <img src="assets/ide_testcase_accepted_verdict.png" alt="CPH Multi-Testcase Runner & Accepted Banner" width="55%" />
@@ -346,7 +372,7 @@ Seamless GitHub portfolio synchronization setup:
 
 Personalize your IDE workstation:
 - **Default Editor Theme:** Choose from VS Code Dark+, Dracula, One Dark Pro, GitHub Dark, Monokai, and Catppuccin Mocha.
-- **Default Language:** Set your default language among all supported standards (C++, Python, Java, Rust, Go, JavaScript, TypeScript, Kotlin, C#, Ruby, Swift, C, PHP, Haskell, and 35+ more).
+- **Default Language:** Set your default language preset from the 11 built-in compiler standards (**C++23 (Latest GCC 14.1)**, **C++20 (GCC 14.1)**, **C++17 (GCC 11.1)**, **Python 3.13 (Latest)**, **Python 3.12**, **Java 21 / 17 (OpenJDK)**, **Rust 1.85 (Latest)**, **Go 1.23 (Latest)**, **JavaScript (Node 22)**, **Kotlin 2.1**, **C# (.NET 8)**).
 - **Editor Font Size Slider:** Granular font sizing from 12px to 24px with live updating.
 - **Vim Mode Toggle:** Enable authentic modal Vim keybindings inside the Monaco editor.
 - **Play Sound on Sync:** Audio chimes for sync successes and verdict notifications.
@@ -451,7 +477,7 @@ This directory exhaustively details every button, dropdown, and control built in
 | **Test (Run) Button** | `▶ Test (Run)` | Topbar Right | Compiles and executes code against **all testcases** in the right panel. Measures wall-clock runtime in milliseconds and memory usage. Shortcut: `Ctrl+Enter` or `Cmd+Enter`. |
 | **Submit Button** | `🚀 Submit` | Topbar Right | Submits the solution directly into the active judge tab's submission form. If direct form injection is unavailable, copies code to clipboard with a toast notification. |
 | **Theme Selector** | `VS Code Dark ▾` | Topbar Center | Dropdown offering 6 themes: **VS Code Dark+**, **Dracula**, **One Dark Pro**, **GitHub Dark**, **Monokai**, and **Catppuccin Mocha**. Propagates across tabs instantly. |
-| **Language Selector** | `C++23 (Latest GCC 14.1) ▾` | Topbar Center | Downward menu selecting compiler standards: Universal support for **all programming languages** (C++, Python, Java, Rust, Go, JavaScript, TypeScript, Kotlin, C#, Ruby, Swift, C, PHP, Haskell, and 35+ more). |
+| **Language Selector** | `C++23 (Latest GCC 14.1) ▾` | Topbar Center | Dropdown selecting active compiler standard: **C++23 (Latest GCC 14.1)**, **C++20 (GCC 14.1)**, **C++17 (GCC 11.1)**, **Python 3.13 (Latest)**, **Python 3.12**, **Java 21 / 17 (OpenJDK)**, **Rust 1.85 (Latest)**, **Go 1.23 (Latest)**, **JavaScript (Node 22)**, **Kotlin 2.1**, and **C# (.NET 8)**. All 35+ languages supported for automated sync. |
 | **Format Button** | `⚡ Format` | Topbar Center | Formats code with 4-space indentation and operator padding while **shielding ASCII art comments, block comments, and string literals** from corruption. Shortcut: `Alt+Shift+F`. |
 | **Snippets Button** | `⚡ Snippets` | Topbar Center | Opens the Algorithmic Snippets drawer containing pre-built competitive programming templates (Fast I/O, Modular Arithmetic, DSU, Segment Tree, Sieve). |
 | **Audio Notification** | `🔔` (Bell Icon) | Topbar Center | Toggles sound effects for Accepted verdicts and test completion. Stored in local settings. |
