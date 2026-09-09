@@ -112,7 +112,7 @@ The table below catalogs every graphic asset utilized in this documentation:
 
 | Asset Filename | Visual Name / Title | Description & Context |
 | :--- | :--- | :--- |
-| `assets/logo.png` | **Official Glowing Emblem** | Hexagonal high-resolution logo with electric neon accents. |
+| `assets/logo.png` | **Official Glowing Emblem** | Circular high-resolution emblem with electric neon accents and multi-platform judge integration. |
 | `assets/ide_full_workspace.png` | **Full Monaco CP Workstation** | Panoramic 3-column competitive programming studio. |
 | `assets/ide_action_buttons.png` | **IDE Primary Action Controls** | Tactile Compile, Test (Run), and Submit control group. |
 | `assets/ide_toolbar_controls.png` | **IDE Standards & Toolbar** | Language standard, Monaco theme, Format, and Snippet selectors. |
