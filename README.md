@@ -8,15 +8,15 @@
 
 <p align="center">
   <strong>The All-in-One Competitive Programming Workstation & Automated GitHub Synchronization Engine</strong><br>
-  <em>Code, test, debug, upsolve, and archive your solutions seamlessly in all programming languages across Codeforces, AtCoder, LeetCode, and Toph.</em>
+  <em>Code, test, debug, upsolve, and archive your solutions seamlessly in all programming languages across Codeforces, AtCoder, CSES, LeetCode, and Toph.</em>
 </p>
 
 <p align="center">
-  <a href="https://developer.chrome.com/docs/extensions/mv3/intro/"><img src="https://img.shields.io/badge/Manifest-V3-6366f1?style=for-the-badge&logo=google-chrome&logoColor=white" alt="Manifest V3" /></a>
+  <a href="https://developer.chrome.com/docs/extensions/mv3/intro/"><img src="https://img.shields.io/badge/Manifest-V3-2f81f7?style=for-the-badge&logo=google-chrome&logoColor=white" alt="Manifest V3" /></a>
   <a href="https://www.google.com/chrome/"><img src="https://img.shields.io/badge/Chrome-110%2B-4285f4?style=for-the-badge&logo=google-chrome&logoColor=white" alt="Google Chrome" /></a>
   <a href="https://www.microsoft.com/edge"><img src="https://img.shields.io/badge/Edge-110%2B-0078d7?style=for-the-badge&logo=microsoft-edge&logoColor=white" alt="Microsoft Edge" /></a>
   <a href="https://microsoft.github.io/monaco-editor/"><img src="https://img.shields.io/badge/Editor-Monaco%20(VS%20Code)-0ea5e9?style=for-the-badge&logo=visual-studio-code&logoColor=white" alt="Monaco Editor" /></a>
-  <a href="https://github.com"><img src="https://img.shields.io/badge/Sync-CF%20%7C%20AC%20%7C%20LC%20%7C%20TP-f59e0b?style=for-the-badge&logo=github&logoColor=white" alt="Platforms" /></a>
+  <a href="https://github.com"><img src="https://img.shields.io/badge/Sync-CF%20%7C%20AC%20%7C%20CSES%20%7C%20LC%20%7C%20TP-2f81f7?style=for-the-badge&logo=github&logoColor=white" alt="Platforms" /></a>
   <a href="#license"><img src="https://img.shields.io/badge/License-MIT-22c55e?style=for-the-badge" alt="License MIT" /></a>
 </p>
 
@@ -614,7 +614,7 @@ Every time an Accepted verdict is achieved, CodeSync Pro archives the solution d
 ```
 your-repo/
 ├── AtCoder/
-│   └── abc368/
+│   └── Beginner/
 │       └── A - Cut/
 │           ├── A - Cut.cpp
 │           └── README.md
@@ -627,12 +627,19 @@ your-repo/
 │   ├── Div. 3/
 │   ├── Div. 4/
 │   └── Others/
+├── CSES/
+│   ├── 1068 - Weird Algorithm/
+│   │   ├── Weird_Algorithm.cpp
+│   │   └── README.md
+│   └── 1633 - Dice Combinations/
+│       ├── Dice_Combinations.cpp
+│       └── README.md
 ├── LeetCode/
 │   └── 0121 - Best Time to Buy and Sell Stock/
-│       ├── solution.cpp
+│       ├── 0121 - Best Time to Buy and Sell Stock.cpp
 │       └── README.md
 └── Toph/
-    └── Easy/
+    └── Practice/
         └── Byang's Additions/
             ├── Byang's Additions.cpp
             └── README.md
@@ -646,10 +653,11 @@ your-repo/
 
 ### 7. Judge DOM Scraping & One-Click Auto-Submit Bridges
 
-- **Codeforces:** Injects submission code into the active contest or problemset sidebar, with fallback redirect handling.
-- **AtCoder:** Automatically detects active language selection and populates the task submission textarea.
-- **LeetCode:** Monitors GraphQL submission endpoints for verdict status and fetches source code.
-- **Toph:** Hooks into submission result websockets and displays the **Synced to GitHub ↗** verification badge upon acceptance.
+- **Codeforces:** 1-Click direct submission from CodeSync IDE! Injects submission code into the contest/problemset submit form, selects the G++23 compiler, and executes the submit with zero delay.
+- **AtCoder:** 1-Click direct submission from CodeSync IDE! Detects language selection and populates the task submission form.
+- **CSES Problem Set:** 1-Click direct submission from CodeSync IDE! Automatically packages source code via browser `DataTransfer` file upload, selects your compiler (e.g. C++20, Python 3, Java), and submits without bot-blocks or captcha puzzles.
+- **LeetCode:** Monitors Accepted verdicts and syncs problem questions and accepted solutions cleanly.
+- **Toph:** Automatically captures Accepted submissions and archives them directly to GitHub with problem statements and signatures.
 
 ---
 
@@ -723,7 +731,7 @@ git clone https://github.com/imposter-bho0/codesync-pro.git
 | Issue | Root Cause | Solution |
 | :--- | :--- | :--- |
 | **GitHub Sync Fails (401/403)** | Invalid or expired Personal Access Token | Generate a fresh classic token with the `repo` scope at GitHub Settings. |
-| **IDE says "No Problem Active"** | Tab not detected on a supported problem URL | Navigate to a valid problem on CF, AC, LC, or Toph, then click the `🔄` Refresh icon. |
+| **IDE says "No Problem Active"** | Tab not detected on a supported problem URL | Navigate to a valid problem on CF, AC, CSES, LC, or Toph, then click the `🔄` Refresh icon. |
 | **Testcase Execution Timeout** | Infinite loop or slow server response | Verify base cases in code; increase timeout slider in Settings to 5-10s. |
 | **Streak shows Red ✕** | Only failed attempts recorded today | Solve at least one problem with an Accepted verdict to maintain your streak. |
 
@@ -733,7 +741,7 @@ git clone https://github.com/imposter-bho0/codesync-pro.git
 
 <details>
 <summary><strong>Does CodeSync Pro support all programming languages?</strong></summary>
-<strong>Yes, 100%!</strong> CodeSync Pro provides universal support for all programming languages. Whether you code in C++, Python, Java, Rust, Go, JavaScript, TypeScript, Kotlin, C#, Ruby, Swift, C, PHP, Haskell, Scala, Dart, Perl, Pascal, Bash, or any other language across Codeforces, AtCoder, LeetCode, and Toph, CodeSync Pro executes, formats, and automatically archives your code to your GitHub repository with appropriate language-specific file extensions (<code>.cpp</code>, <code>.py</code>, <code>.java</code>, <code>.rs</code>, <code>.go</code>, <code>.js</code>, <code>.ts</code>, <code>.kt</code>, <code>.cs</code>, <code>.rb</code>, <code>.swift</code>, etc.) and complete documentation.
+<strong>Yes, 100%!</strong> CodeSync Pro provides universal support for all programming languages. Whether you code in C++, Python, Java, Rust, Go, JavaScript, TypeScript, Kotlin, C#, Ruby, Swift, C, PHP, Haskell, Scala, Dart, Perl, Pascal, Bash, or any other language across Codeforces, AtCoder, CSES, LeetCode, and Toph, CodeSync Pro executes, formats, and automatically archives your code to your GitHub repository with appropriate language-specific file extensions (<code>.cpp</code>, <code>.py</code>, <code>.java</code>, <code>.rs</code>, <code>.go</code>, <code>.js</code>, <code>.ts</code>, <code>.kt</code>, <code>.cs</code>, <code>.rb</code>, <code>.swift</code>, etc.) and complete documentation.
 </details>
 
 <details>
