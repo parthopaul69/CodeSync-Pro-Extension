@@ -2778,9 +2778,7 @@
       .trim();
     const a = norm(actual);
     const e = norm(expected);
-    if (a === e) return true;
-    if (a.toLowerCase() === e.toLowerCase()) return true;
-    return false;
+    return a === e;
   }
 
   $('compile-btn').addEventListener('click', compileSolution);
