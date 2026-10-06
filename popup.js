@@ -86,12 +86,12 @@ const PLATFORMS = {
     label: 'CSES',
     color: '#58a6ff',
     segments: [
-      { key: 'introductory', label: 'Introductory', color: '#64b5f6' },
-      { key: 'sorting', label: 'Sorting & Searching', color: '#81c784' },
-      { key: 'dp', label: 'Dynamic Programming', color: '#ffb74d' },
-      { key: 'graph_trees', label: 'Graphs & Trees', color: '#ff8a80' },
-      { key: 'math_queries', label: 'Math & Queries', color: '#ba68c8' },
-      { key: 'others', label: 'Others / Advanced', color: '#4dd0e1' }
+      { key: 'introductory', label: 'Introductory', color: '#58a6ff' },
+      { key: 'sorting', label: 'Sorting & Searching', color: '#3fb950' },
+      { key: 'dp', label: 'Dynamic Programming', color: '#d29922' },
+      { key: 'graph_trees', label: 'Graphs & Trees', color: '#f85149' },
+      { key: 'math_queries', label: 'Math & Queries', color: '#bc8cff' },
+      { key: 'others', label: 'Others / Advanced', color: '#f778ba' }
     ]
   }
 };
