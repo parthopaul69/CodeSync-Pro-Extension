@@ -458,13 +458,6 @@ function getStreakData(platform) {
     }
   }
 
-  if (platform === 'CSES') {
-    const todayLocalStr = todayInOffset(userLocalOffset);
-    if ((subActivity[todayLocalStr] || 0) >= 5 && (csesAttemptsCount || 0) >= 5) {
-      acceptedActivity[todayLocalStr] = Math.max(acceptedActivity[todayLocalStr] || 0, 4);
-    }
-  }
-
   const { days, streak: computedStreak, todayCount: computedToday } = computeStreakFromActivity(subActivity, offset);
 
   days.forEach(day => {
@@ -1284,11 +1277,6 @@ function renderAttemptGraph(platform) {
     for (const [dStr, subCount] of Object.entries(pSubAct)) {
       if (timelineMap[dStr] !== undefined && typeof subCount === 'number' && subCount > 0) {
         let acCount = (dayPlatformSuccess[dStr] && dayPlatformSuccess[dStr][p]) || (pAct[dStr] || 0);
-        if (p === 'CSES' && dStr === todayDateStr && subCount >= 5 && (csesAttemptsCount || 0) >= 5) {
-          acCount = Math.max(acCount, 4);
-          if (!dayPlatformSuccess[dStr]) dayPlatformSuccess[dStr] = {};
-          dayPlatformSuccess[dStr][p] = acCount;
-        }
         const failedCount = Math.max(0, subCount - acCount);
         if (!dayPlatformFailed[dStr]) dayPlatformFailed[dStr] = {};
         dayPlatformFailed[dStr][p] = failedCount;
