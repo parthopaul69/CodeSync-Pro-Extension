@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CodeSync Pro Side Panel</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="lib/monaco/vs/editor/editor.main.css" />
+  <link rel="stylesheet" href="ide.css" />
+  <style>
+    /* Side Panel Specific Compact Layout Overrides */
+    body { width: 100%; height: 100vh; }
+    .ide-toolbar { height: 42px; padding: 0 10px; }
+    .brand-name { font-size: 12px; }
+    .problem-badge-wrap { max-width: 140px; padding: 3px 6px; }
+    .problem-title-link { max-width: 90px; font-size: 10.5px; }
+    .toolbar-select { font-size: 10px; padding: 4px 20px 4px 6px; }
+    .btn-action { padding: 4px 10px; font-size: 11px; }
+
+    .ide-workspace { flex-direction: column; }
+    .panel-statement { display: none !important; }
+    #gutter-1 { display: none !important; }
+
+    .panel-editor { flex: 1.2; min-height: 200px; border-bottom: 1px solid var(--border); }
+    #gutter-2 {
+      width: 100%;
+      height: 5px;
+      cursor: row-resize;
+      background: var(--border);
+    }
+    #gutter-2:hover, #gutter-2.dragging { background: var(--accent); }
+
+    .panel-cph {
+      width: 100% !important;
+      min-width: 100% !important;
+      flex: 0.8;
+      border-left: none;
+      min-height: 150px;
+    }
+
+    .popout-btn {
+      background: #252526; border: 1px solid #383838; border-radius: 4px;
+      color: #cccccc; font-size: 11px; padding: 3px 6px; cursor: pointer;
+    }
+    .popout-btn:hover { background: #2d2d2d; color: #fff; }
+
+    /* Sidepanel CPH testcase cards */
+    .testcase-card {
+      background: #1e1e1e;
+      border: 1px solid #2d2d2d;
+      border-left: 4px solid #333333;
+      border-radius: 4px;
+      margin-bottom: 8px;
+      overflow: hidden;
+    }
+    .testcase-card.passed {
+      border-left: 4px solid #4caf50;
+      border-color: #2d2d2d;
+    }
+    .testcase-card.failed {
+      border-left: 4px solid #f44336;
+      border-color: #2d2d2d;
+    }
+    .testcase-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 6px 10px;
+      background: #252526;
+      border-bottom: 1px solid #2d2d2d;
+    }
+    .testcase-title {
+      font-size: 11px;
+      font-weight: 700;
+      color: #007acc;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .testcase-verdict {
+      font-size: 10px;
+      font-weight: 700;
+      padding: 1px 5px;
+      border-radius: 3px;
+    }
+    .verdict-badge-ac { background: transparent; border: 1px solid #4caf50; color: #73c991; }
+    .verdict-badge-wa { background: transparent; border: 1px solid #f44336; color: #f87171; }
+    .testcase-actions {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .btn-test-action {
+      background: #252526;
+      border: 1px solid #383838;
+      color: #cccccc;
+      border-radius: 3px;
+      padding: 2px 6px;
+      font-size: 10px;
+      cursor: pointer;
+    }
+    .btn-test-action:hover { background: #333333; color: #fff; }
+    .btn-test-action.btn-run-single { background: #588b39; border-color: #588b39; color: #fff; }
+    .btn-test-action.btn-run-single:hover { background: #649d41; }
+    .btn-test-action.btn-del { background: #b82e3d; border-color: #b82e3d; color: #fff; }
+    .btn-test-action.btn-del:hover { background: #c72e41; }
+    .testcase-body {
+      padding: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      background: #1e1e1e;
+    }
+    .testcase-io-group label {
+      font-size: 10px;
+      font-weight: 600;
+      color: #888888;
+      display: block;
+      margin-bottom: 2px;
+    }
+    .testcase-textarea {
+      width: 100%;
+      min-height: 38px;
+      background: #141414;
+      border: 1px solid #2d2d2d;
+      border-radius: 3px;
+      color: #e0e0e0;
+      font-family: var(--font-code);
+      font-size: 11.5px;
+      padding: 4px 6px;
+      resize: vertical;
+      box-sizing: border-box;
+      outline: none;
+    }
+    .testcase-textarea:focus { border-color: #007acc; }
+  </style>
+</head>
+<body class="theme-dark">
+  <!-- Side Panel Header Toolbar -->
+  <header class="ide-toolbar">
+    <div class="toolbar-left">
+      <div class="brand">
+        <img src="icons/icon48.png" alt="Logo" class="brand-logo" style="width:22px; height:22px; border-radius:50%; object-fit:contain;" />
+        <span class="brand-name">CodeSync</span>
+      </div>
+      <div class="problem-badge-wrap" id="problem-badge-wrap">
+        <span class="problem-platform-tag" id="problem-platform">LOCAL</span>
+        <a href="#" class="problem-title-link" id="problem-title" target="_blank">No problem</a>
+        <button class="btn-icon-subtle" id="refresh-problem-btn" title="Sync with active tab">🔄</button>
+      </div>
+    </div>
+
+    <div class="toolbar-center">
+      <div class="select-wrapper">
+        <select id="lang-select" class="toolbar-select">
+          <option value="cpp">C++</option>
+          <option value="python">Python</option>
+          <option value="java">Java</option>
+          <option value="rust">Rust</option>
+          <option value="go">Go</option>
+          <option value="javascript">JS</option>
+          <option value="kotlin">Kotlin</option>
+          <option value="csharp">C#</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="toolbar-right">
+      <button class="btn-action btn-run" id="run-all-tests-btn" title="Run tests (Ctrl+Shift+Enter)">▶ Run</button>
+      <button class="btn-action btn-submit" id="submit-code-btn" title="Submit to page (Ctrl+Enter)">🚀 Submit</button>
+      <button class="popout-btn" id="popout-tab-btn" title="Open full tab IDE">↗</button>
+    </div>
+  </header>
+
+  <!-- Vertically Stacked Editor & CPH Runner -->
+  <main class="ide-workspace">
+    <!-- Editor Panel -->
+    <section class="panel panel-editor" id="panel-editor">
+      <div class="editor-subtoolbar">
+        <div class="file-tab active">
+          <span class="file-name" id="file-tab-name">solution.cpp</span>
+          <span class="file-dirty-dot" id="file-dirty-dot"></span>
+        </div>
+        <div class="editor-meta">
+          <span id="editor-cursor-pos">Ln 1, Col 1</span>
+        </div>
+      </div>
+      <div class="editor-container" id="editor-container"></div>
+    </section>
+
+    <!-- Resizer Horizontal Gutter -->
+    <div id="gutter-2"></div>
+
+    <!-- CPH Testcase Panel -->
+    <section class="panel panel-cph" id="panel-cph">
+      <div class="cph-action-bar">
+        <button class="btn-sm btn-outline" id="add-testcase-btn">+ Add Test</button>
+        <button class="btn-sm btn-outline" id="clear-results-btn">Clear</button>
+        <span class="cph-summary-stats" id="cph-summary-stats">0/0 Passed</span>
+      </div>
+      <div class="testcases-list" id="testcases-list">
+        <div class="empty-state-tests">
+          <p>No tests. Click <strong>+ Add Test</strong> or open problem.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Diff Modal -->
+  <div class="modal" id="diff-modal" style="display:none;">
+    <div class="modal-content modal-diff" style="width: 90%; max-width: 500px;">
+      <div class="modal-header">
+        <h3>Diff Comparison</h3>
+        <button class="close-btn" id="close-diff-btn">&times;</button>
+      </div>
+      <div class="diff-grid" style="grid-template-columns: 1fr;">
+        <div class="diff-pane">
+          <h4>Your Output</h4>
+          <pre class="diff-pre diff-actual" id="diff-actual"></pre>
+        </div>
+        <div class="diff-pane">
+          <h4>Expected Output</h4>
+          <pre class="diff-pre diff-expected" id="diff-expected"></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" style="display:none;"></div>
+
+  <!-- Scripts -->
+  <script src="shared/constants.js"></script>
+  <script src="shared/executor.js"></script>
+  <script src="lib/themes/themes.js"></script>
+  <script src="lib/snippets/snippets.js"></script>
+  <script src="lib/monaco/vs/loader.js"></script>
+  <script src="sidepanel.js"></script>
+</body>
+</html>

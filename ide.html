@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CodeSync Pro IDE — Competitive Programming Workstation</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="lib/monaco/vs/editor/editor.main.css" />
+  <link rel="stylesheet" href="ide.css" />
+</head>
+<body class="theme-dark">
+  <!-- Top Toolbar -->
+  <header class="ide-toolbar">
+    <div class="toolbar-left">
+      <div class="brand">
+        <img src="icons/icon48.png" alt="Logo" class="brand-logo" />
+        <span class="brand-name">CodeSync <span class="brand-badge">IDE</span></span>
+      </div>
+      <div class="problem-badge-wrap" id="problem-badge-wrap">
+        <span class="problem-platform-tag" id="problem-platform">LOCAL</span>
+        <a href="#" class="problem-title-link" id="problem-title" target="_blank">No problem loaded</a>
+        <button class="btn-icon-subtle" id="refresh-problem-btn" title="Detect problem from active tab">🔄</button>
+        <button class="btn-icon-subtle" id="close-problem-top-btn" title="Close question and reset to clean Scratchpad" style="display:none; color:var(--muted); font-size:13px; margin-left:4px; padding:2px 6px;">✕</button>
+      </div>
+    </div>
+
+    <div class="toolbar-center">
+      <!-- Language Picker (Custom Downward Dropdown) -->
+      <div class="custom-dropdown" id="lang-custom-dropdown">
+        <button type="button" class="custom-dropdown-btn" id="lang-dropdown-btn" aria-haspopup="listbox" aria-expanded="false">
+          <span class="dropdown-label" id="lang-dropdown-label">C++23 (Latest GCC 14.1)</span>
+          <span class="dropdown-chevron">▾</span>
+        </button>
+        <div class="custom-dropdown-menu" id="lang-dropdown-menu" role="listbox"></div>
+        <select id="lang-select" class="toolbar-select visually-hidden" tabindex="-1" aria-hidden="true">
+          <option value="cpp">C++23 (Latest GCC 14.1)</option>
+          <option value="cpp20">C++20 (GCC 14.1)</option>
+          <option value="cpp17">C++17 (GCC 11.1)</option>
+          <option value="python">Python 3.13 (Latest)</option>
+          <option value="python312">Python 3.12</option>
+          <option value="java">Java 21 / 17 (OpenJDK)</option>
+          <option value="rust">Rust 1.85 (Latest)</option>
+          <option value="go">Go 1.23 (Latest)</option>
+          <option value="javascript">JavaScript (Node 22)</option>
+          <option value="kotlin">Kotlin 2.1</option>
+          <option value="csharp">C# (.NET 8)</option>
+        </select>
+      </div>
+
+      <!-- Theme Picker (Custom Downward Dropdown) -->
+      <div class="custom-dropdown" id="theme-custom-dropdown">
+        <button type="button" class="custom-dropdown-btn" id="theme-dropdown-btn" aria-haspopup="listbox" aria-expanded="false">
+          <span class="dropdown-label" id="theme-dropdown-label">VS Code Dark</span>
+          <span class="dropdown-chevron">▾</span>
+        </button>
+        <div class="custom-dropdown-menu" id="theme-dropdown-menu" role="listbox"></div>
+        <select id="theme-select" class="toolbar-select visually-hidden" tabindex="-1" aria-hidden="true">
+          <option value="vs-dark">VS Code Dark</option>
+          <option value="vs">VS Code Light</option>
+          <option value="dracula">Dracula</option>
+          <option value="one-dark-pro">One Dark Pro</option>
+          <option value="github-dark">GitHub Dark</option>
+          <option value="monokai">Monokai</option>
+          <option value="catppuccin">Catppuccin Mocha</option>
+        </select>
+      </div>
+
+      <!-- Format Code -->
+      <button class="btn-toolbar" id="format-code-btn" title="Format Document (Shift+Alt+F)">
+        <span>🧹 Format</span>
+      </button>
+
+      <!-- Templates & Snippets Menu -->
+      <button class="btn-toolbar" id="snippets-btn" title="Templates & CP Snippets">
+        <span>⚡ Snippets</span>
+      </button>
+
+      <!-- Sound Notification Toggle -->
+      <button class="btn-toolbar" id="sound-toggle-btn" title="Sound Notifications (Click to toggle)">
+        <span id="sound-icon">🔔</span>
+      </button>
+    </div>
+
+    <div class="toolbar-right">
+      <!-- Compile Button -->
+      <button class="btn-action btn-compile" id="compile-btn" title="Compile Solution & Check Syntax (Ctrl+B)">
+        <span class="btn-icon">🔨</span>
+        <span>Compile</span>
+      </button>
+
+      <!-- Run Tests Button -->
+      <button class="btn-action btn-run" id="run-all-tests-btn" title="Run all testcases (Ctrl+Shift+Enter)">
+        <span class="btn-icon">▶</span>
+        <span>Test (Run)</span>
+      </button>
+
+      <!-- Submit Button -->
+      <button class="btn-action btn-submit" id="submit-code-btn" title="1-Click Auto Submit to Platform (Ctrl+Enter)">
+        <span class="btn-icon">🚀</span>
+        <span>Submit</span>
+      </button>
+
+      <!-- Status Indicator -->
+      <div class="verdict-pill verdict-idle" id="global-verdict">
+        <span class="verdict-dot"></span>
+        <span class="verdict-text" id="global-verdict-text">Ready</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main IDE Workspace -->
+  <main class="ide-workspace" id="ide-workspace">
+    <!-- Docked Expand Button when Problem Statement is Collapsed -->
+    <button class="panel-expand-btn" id="expand-statement-btn" title="Open Problem Statement (Click to expand)" style="display:none;">
+      <span class="expand-icon">📄</span>
+      <span class="expand-arrow">▶</span>
+    </button>
+
+    <!-- Left Panel: Problem Statement -->
+    <section class="panel panel-statement" id="panel-statement">
+      <div class="panel-header">
+        <span class="panel-title">📄 Problem Statement</span>
+        <div class="panel-controls">
+          <button class="panel-btn" id="clear-problem-btn" title="Close question and reset to clean Scratchpad" style="display:none; font-size:11px; padding:2px 8px; gap:4px; align-items:center; color:var(--red); border-color:rgba(239, 68, 68, 0.3);">
+            <span>✕</span>
+            <span>Close Question</span>
+          </button>
+          <button class="panel-btn" id="collapse-statement-btn" title="Toggle Problem Panel">◀</button>
+        </div>
+      </div>
+      <div class="statement-body" id="statement-body">
+        <div class="statement-empty">
+          <div class="empty-icon">💡</div>
+          <h3>No Problem Active</h3>
+          <p>Navigate to any problem on <strong>Codeforces</strong>, <strong>AtCoder</strong>, or <strong>CSES</strong>, or click <strong>Refresh</strong> in the toolbar to auto-load the statement & testcases.</p>
+          <div class="quick-links">
+            <a href="https://codeforces.com/problemset" target="_blank" class="quick-link cf">Codeforces</a>
+            <a href="https://atcoder.jp/contests" target="_blank" class="quick-link ac">AtCoder</a>
+            <a href="https://cses.fi/problemset" target="_blank" class="quick-link cses">CSES</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Resizer 1 -->
+    <div class="gutter gutter-horizontal" id="gutter-1"></div>
+
+    <!-- Center Panel: Code Editor -->
+    <section class="panel panel-editor" id="panel-editor">
+      <div class="editor-header">
+        <div class="file-tab">
+          <span class="file-icon">📄</span>
+          <span class="file-name" id="file-tab-name">solution.cpp</span>
+          <span class="file-dirty-dot" id="file-dirty-dot"></span>
+        </div>
+        <div class="editor-meta">
+          <span id="editor-cursor-pos">Ln 1, Col 1</span>
+          <span id="editor-encoding">UTF-8</span>
+        </div>
+      </div>
+      <div class="editor-container" id="editor-container"></div>
+    </section>
+
+    <!-- Resizer 2 -->
+    <div class="gutter gutter-horizontal" id="gutter-2"></div>
+
+    <!-- Right Panel: Testcases Runner & Compiler Diagnostics -->
+    <section class="panel panel-cph" id="panel-cph">
+      <div class="panel-header">
+        <div class="panel-header-tabs">
+          <button class="panel-tab-btn active" id="tab-btn-testcases">
+            <span>⚡ Testcases</span>
+            <span class="badge-count" id="testcases-count">0</span>
+          </button>
+          <button class="panel-tab-btn" id="tab-btn-compiler">
+            <span>🖥️ Compiler Output</span>
+            <span class="badge-count badge-ce" id="compiler-error-count" style="display:none;">0</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Testcases View -->
+      <div class="cph-view-content" id="cph-testcases-view">
+        <div class="cph-action-bar">
+          <div class="cph-bar-wrap">
+            <div class="cph-judge-label">CPH Judge: Results</div>
+            <div class="cph-bar-row">
+              <span class="cph-local-title" id="cph-local-title">Local: 0</span>
+              <span class="cph-summary-stats" id="cph-summary-stats">0 / 0 passed</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="testcases-list" id="testcases-list">
+          <div class="empty-state-tests">
+            <p>No testcases found. Click <strong>+ New Testcase</strong> or open a problem page to auto-extract samples.</p>
+          </div>
+        </div>
+
+        <!-- Bottom Controls Bar (Run All & Trash - Matching VS Code CPH) -->
+        <div class="cph-bottom-bar">
+          <button class="btn-cph-run-all" id="cph-run-all-btn" title="Run all testcases (Ctrl+Shift+Enter)">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon><line x1="12" y1="18" x2="12" y2="13"></line><polyline points="10 15 12 13 14 15"></polyline></svg>
+            <span>Run All</span>
+          </button>
+          <button class="btn-cph-trash" id="clear-results-btn" title="Clear all verdicts &amp; output">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Compiler Diagnostics / Output View (VS Code Style) -->
+      <div class="cph-view-content hidden" id="cph-compiler-view" style="display: none !important;">
+        <div class="compiler-toolbar">
+          <div class="compiler-status-summary" id="compiler-status-summary">
+            <span class="status-indicator-dot idle" id="compiler-dot"></span>
+            <span id="compiler-summary-text">Ready to compile</span>
+          </div>
+          <div class="compiler-toolbar-actions">
+            <button class="btn-sm btn-outline" id="clear-compiler-output-btn">Clear</button>
+          </div>
+        </div>
+
+        <!-- Structured Errors List (Click to Jump to Line) -->
+        <div class="compiler-problems-wrap" id="compiler-problems-wrap" style="display:none;">
+          <div class="compiler-problems-header">Problems & Diagnostics:</div>
+          <div class="compiler-problems-list" id="compiler-problems-list"></div>
+        </div>
+
+        <!-- Raw Compiler Terminal Output (Like VS Code Output Pane) -->
+        <div class="compiler-raw-output-wrap">
+          <div class="compiler-output-label">Terminal / GCC Output:</div>
+          <pre class="compiler-terminal-pre" id="compiler-terminal-output">// Click Compile (Ctrl+B) or Test (Run) to view full compiler diagnostics here.</pre>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Diff Viewer Modal -->
+  <div class="modal" id="diff-modal" style="display:none;">
+    <div class="modal-content modal-diff">
+      <div class="modal-header">
+        <h3>Output Comparison (Diff)</h3>
+        <button class="close-btn" id="close-diff-btn">&times;</button>
+      </div>
+      <div class="diff-grid">
+        <div class="diff-pane">
+          <h4>Your Output</h4>
+          <pre class="diff-pre diff-actual" id="diff-actual"></pre>
+        </div>
+        <div class="diff-pane">
+          <h4>Expected Output</h4>
+          <pre class="diff-pre diff-expected" id="diff-expected"></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Templates & Snippets Modal -->
+  <div class="modal" id="snippets-modal" style="display:none;">
+    <div class="modal-content modal-snippets">
+      <div class="modal-header">
+        <h3>Templates & CP Snippets</h3>
+        <button class="close-btn" id="close-snippets-btn">&times;</button>
+      </div>
+      <div class="modal-subnav">
+        <button class="subnav-btn active" id="subnav-templates">📋 Code Templates</button>
+        <button class="subnav-btn" id="subnav-snippets">🧩 CP Snippets</button>
+        <button class="subnav-btn" id="subnav-create">➕ Create Template</button>
+        <button class="subnav-btn" id="subnav-create-snippet">🧩 Create Snippet</button>
+      </div>
+
+      <!-- Templates Tab -->
+      <div class="modal-tab-content" id="tab-content-templates">
+        <div class="template-instructions">
+          Choose a boilerplate template for your solution. Applying a template replaces your current empty or boilerplate solution cleanly without code overlap.
+        </div>
+        <div class="templates-list" id="templates-list"></div>
+      </div>
+
+      <!-- Snippets Tab -->
+      <div class="modal-tab-content" id="tab-content-snippets" style="display:none;">
+        <div class="template-instructions">
+          Click any snippet to insert it at your current cursor location in the editor. Tab through snippet placeholders.
+        </div>
+        <div class="snippets-body" id="snippets-body"></div>
+      </div>
+
+      <!-- Create Custom Template Tab -->
+      <div class="modal-tab-content" id="tab-content-create" style="display:none;">
+        <div class="create-template-form">
+          <div class="form-group">
+            <label>Template Name:</label>
+            <input type="text" id="custom-template-name" class="form-input" placeholder="e.g., My C++ Graph Template">
+          </div>
+          <div class="form-group">
+            <label>Language:</label>
+            <select id="custom-template-lang" class="form-input">
+              <option value="cpp">C++</option>
+              <option value="python">Python</option>
+              <option value="java">Java</option>
+              <option value="rust">Rust</option>
+              <option value="go">Go</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Template Code:</label>
+            <textarea id="custom-template-code" class="code-textarea" rows="10" placeholder="// Paste your template code here..."></textarea>
+          </div>
+          <div class="form-group" style="display:flex; align-items:center; gap:8px;">
+            <input type="checkbox" id="custom-template-default">
+            <label for="custom-template-default" style="font-size:12px; cursor:pointer;">Set as default starter template for this language</label>
+          </div>
+          <div style="margin-top:14px; display:flex; gap:10px;">
+            <button class="btn-action btn-run" id="save-custom-template-btn">💾 Save Custom Template</button>
+            <button class="btn-sm btn-outline" id="cancel-custom-template-btn">Cancel</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Create Custom Snippet Tab -->
+      <div class="modal-tab-content" id="tab-content-create-snippet" style="display:none;">
+        <div class="create-template-form">
+          <div class="form-group">
+            <label>Snippet Name:</label>
+            <input type="text" id="custom-snippet-name" class="form-input" placeholder="e.g., Fast I/O & Modulo">
+          </div>
+          <div class="form-group">
+            <label>Trigger Prefix (Type this in editor to trigger snippet):</label>
+            <input type="text" id="custom-snippet-prefix" class="form-input" placeholder="e.g., fio or modop">
+          </div>
+          <div class="form-group">
+            <label>Language:</label>
+            <select id="custom-snippet-lang" class="form-input">
+              <option value="cpp">C++</option>
+              <option value="python">Python</option>
+              <option value="java">Java</option>
+              <option value="rust">Rust</option>
+              <option value="go">Go</option>
+              <option value="all">All Languages</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Snippet Code:</label>
+            <textarea id="custom-snippet-code" class="code-textarea" rows="8" placeholder="// Snippet code with optional placeholders like ${1:var}..."></textarea>
+          </div>
+          <div style="margin-top:14px; display:flex; gap:10px;">
+            <button class="btn-action btn-run" id="save-custom-snippet-btn">💾 Save Custom Snippet</button>
+            <button class="btn-sm btn-outline" id="cancel-custom-snippet-btn">Cancel</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div class="toast" id="toast" style="display:none;"></div>
+
+  <!-- Scripts -->
+  <script src="shared/constants.js"></script>
+  <script src="shared/executor.js"></script>
+  <script src="lib/themes/themes.js"></script>
+  <script src="lib/snippets/snippets.js"></script>
+  <script src="lib/monaco/vs/loader.js"></script>
+  <script src="ide.js"></script>
+</body>
+</html>
