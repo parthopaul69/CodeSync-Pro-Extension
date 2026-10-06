@@ -535,11 +535,7 @@ function renderStreak(platform) {
 
     let tooltipText;
     if (day.acceptedCount > 0 && day.count > day.acceptedCount) {
-      if ((platform === 'CSES' || currentTab === 'CSES') && csesSolvedCount > 0 && csesSolvedCount !== day.acceptedCount) {
-        tooltipText = `${day.acceptedCount} accepted (${csesSolvedCount} solved), ${day.count - day.acceptedCount} failed`;
-      } else {
-        tooltipText = `${day.acceptedCount} accepted, ${day.count - day.acceptedCount} failed`;
-      }
+      tooltipText = `${day.acceptedCount} accepted, ${day.count - day.acceptedCount} failed`;
     } else if (day.acceptedCount > 0) {
       tooltipText = `${day.acceptedCount} solved`;
     } else if (day.hasSubmission) {
@@ -555,11 +551,7 @@ function renderStreak(platform) {
       if (day.hasSubmission && day.acceptedCount === 0) {
         tip.innerHTML = `<span style="color:#ef4444;font-weight:700;">✕ ${day.count} failed attempt${day.count > 1 ? 's' : ''}</span> <span style="color:#22c55e;font-size:10px;font-weight:600;">(active)</span>`;
       } else if (day.acceptedCount > 0 && day.count > day.acceptedCount) {
-        if ((platform === 'CSES' || currentTab === 'CSES') && csesSolvedCount > 0 && csesSolvedCount !== day.acceptedCount) {
-          tip.innerHTML = `<span style="color:#22c55e;font-weight:700;">✓ ${day.acceptedCount} accepted (${csesSolvedCount} solved)</span>, <span style="color:#ef4444;font-weight:700;">✕ ${day.count - day.acceptedCount} failed</span>`;
-        } else {
-          tip.innerHTML = `<span style="color:#22c55e;font-weight:700;">✓ ${day.acceptedCount} accepted</span>, <span style="color:#ef4444;font-weight:700;">✕ ${day.count - day.acceptedCount} failed</span>`;
-        }
+        tip.innerHTML = `<span style="color:#22c55e;font-weight:700;">✓ ${day.acceptedCount} accepted</span>, <span style="color:#ef4444;font-weight:700;">✕ ${day.count - day.acceptedCount} failed</span>`;
       } else if (day.acceptedCount > 0) {
         tip.innerHTML = `<span style="color:#22c55e;font-weight:700;">✓ ${day.acceptedCount} solved</span>`;
       } else {
