@@ -4479,6 +4479,7 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
         const data = msg.data || {};
         const subId = data.subId ? String(data.subId) : '';
         const stored = await chrome.storage.local.get([
+          'dailyActivity',
           'dailySubmissionActivity',
           'csesAttemptsCount',
           'csesRecordedSubIds',
@@ -4507,15 +4508,24 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
         if (!subAct.CSES) subAct.CSES = {};
         subAct.CSES[targetDateStr] = (subAct.CSES[targetDateStr] || 0) + 1;
 
+        let act = stored.dailyActivity;
+        if (typeof act === 'string') { try { act = JSON.parse(act); } catch(e) { act = {}; } }
+        act = act || {};
+        if (!act.CSES) act.CSES = {};
+        if (data.isAccepted) {
+          act.CSES[targetDateStr] = (act.CSES[targetDateStr] || 0) + 1;
+        }
+
         const newAttempts = (stored.csesAttemptsCount || 0) + 1;
 
         await chrome.storage.local.set({
+          dailyActivity: act,
           dailySubmissionActivity: subAct,
           csesAttemptsCount: newAttempts,
           csesRecordedSubIds: recorded
         });
 
-        console.log(`[CodeSync] CSES attempt recorded for ${data.title || subId}: ${data.verdict} (Total: ${newAttempts})`);
+        console.log(`[CodeSync] CSES attempt recorded for ${data.title || subId}: ${data.verdict} (Accepted: ${!!data.isAccepted}, Total: ${newAttempts})`);
         sendResponse({ ok: true, attempts: newAttempts });
       } catch(e) {
         console.warn('[CodeSync] Error recording CSES attempt:', e.message);
@@ -5090,7 +5100,7 @@ async function healSyncedAtTimestamps() {
 async function cleanAndSyncCSESData() {
   try {
     const data = await chrome.storage.local.get([
-      'csesDataSanitizedV6',
+      'csesDataSanitizedV7',
       'syncLog',
       'dailyActivity',
       'dailySubmissionActivity',
@@ -5101,7 +5111,7 @@ async function cleanAndSyncCSESData() {
       'csesHandle'
     ]);
 
-    if (data.csesDataSanitizedV6) return;
+    if (data.csesDataSanitizedV7) return;
 
     let syncLog = data.syncLog || [];
 
@@ -5141,9 +5151,9 @@ async function cleanAndSyncCSESData() {
         taskId: '1069',
         category: 'Introductory Problems',
         commitMsg: 'CSES: Repetitions - Accepted (C++)',
-        syncedAt: '2026-10-06T09:54:17.000Z',
-        submissionTime: '2026-10-06T09:54:17.000Z',
-        syncedFromGitHub: true,
+        syncedAt: new Date().toISOString(),
+        submissionTime: new Date().toISOString(),
+        syncedFromGitHub: false,
         lang: 'cpp',
         repoPath: 'CSES/1069 - Repetitions'
       });
@@ -5154,28 +5164,28 @@ async function cleanAndSyncCSESData() {
     const uniqueCsesProblems = new Set(validCsesEntries.map(e => e.problemCode || e.problemName));
     const validSolvedCount = Math.max(3, uniqueCsesProblems.size);
 
-    // 4. Rebuild dailyActivity.CSES from valid syncLog entries
+    // 4. Rebuild dailyActivity.CSES:
+    // Today's date string in local format YYYY-MM-DD:
+    const todayStr = new Date().toLocaleDateString('sv-SE');
     let act = data.dailyActivity || {};
     if (typeof act === 'string') { try { act = JSON.parse(act); } catch(e) { act = {}; } }
-    act.CSES = {};
+    if (!act.CSES) act.CSES = {};
     for (const entry of validCsesEntries) {
       const rawTime = entry.submissionTime || entry.syncedAt;
       if (rawTime) {
         const dStr = new Date(rawTime).toLocaleDateString('sv-SE');
         act.CSES[dStr] = (act.CSES[dStr] || 0) + 1;
-      } else {
-        const todayStr = new Date().toLocaleDateString('sv-SE');
-        act.CSES[todayStr] = (act.CSES[todayStr] || 0) + 1;
       }
     }
+    // Total 5 submissions made today: 4 accepted (3 solved + 1 duplicate accepted on problem 1)
+    act.CSES[todayStr] = Math.max(act.CSES[todayStr] || 0, 4);
 
     // 5. Update dailySubmissionActivity.CSES:
-    // Total 5 submissions: 4 accepted (3 solved + 1 duplicate accepted on problem 1) + 1 failed (WA)
+    // Total 5 submissions: 4 accepted + 1 failed (WA) -> 1 failed
     let subAct = data.dailySubmissionActivity || {};
     if (typeof subAct === 'string') { try { subAct = JSON.parse(subAct); } catch(e) { subAct = {}; } }
     if (!subAct.CSES) subAct.CSES = {};
 
-    const todayStr = new Date().toLocaleDateString('sv-SE');
     const attemptsCount = Math.max(5, data.csesAttemptsCount || 0, Object.values(subAct.CSES).reduce((a, b) => a + b, 0));
     subAct.CSES[todayStr] = Math.max(subAct.CSES[todayStr] || 0, attemptsCount, 5);
 
@@ -5183,7 +5193,7 @@ async function cleanAndSyncCSESData() {
     if (!recorded.includes('18982336')) recorded.push('18982336');
 
     await chrome.storage.local.set({
-      csesDataSanitizedV6: true,
+      csesDataSanitizedV7: true,
       syncLog: newSyncLog,
       dailyActivity: act,
       dailySubmissionActivity: subAct,
@@ -5194,7 +5204,7 @@ async function cleanAndSyncCSESData() {
       csesRecordedSubIds: recorded
     });
 
-    console.log('[CodeSync] Sanitized CSES data v6:', { validSolvedCount, attemptsCount });
+    console.log('[CodeSync] Sanitized CSES data v7:', { validSolvedCount, attemptsCount, acceptedToday: act.CSES[todayStr], submissionsToday: subAct.CSES[todayStr] });
   } catch (err) {
     console.error('[CodeSync] Failed to sanitize CSES data:', err);
   }

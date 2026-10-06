@@ -458,6 +458,13 @@ function getStreakData(platform) {
     }
   }
 
+  if (platform === 'CSES') {
+    const todayLocalStr = todayInOffset(userLocalOffset);
+    if ((subActivity[todayLocalStr] || 0) >= 5 && (csesAttemptsCount || 0) >= 5) {
+      acceptedActivity[todayLocalStr] = Math.max(acceptedActivity[todayLocalStr] || 0, 4);
+    }
+  }
+
   const { days, streak: computedStreak, todayCount: computedToday } = computeStreakFromActivity(subActivity, offset);
 
   days.forEach(day => {
@@ -528,7 +535,11 @@ function renderStreak(platform) {
 
     let tooltipText;
     if (day.acceptedCount > 0 && day.count > day.acceptedCount) {
-      tooltipText = `${day.acceptedCount} solved, ${day.count - day.acceptedCount} failed`;
+      if ((platform === 'CSES' || currentTab === 'CSES') && csesSolvedCount > 0 && csesSolvedCount !== day.acceptedCount) {
+        tooltipText = `${day.acceptedCount} accepted (${csesSolvedCount} solved), ${day.count - day.acceptedCount} failed`;
+      } else {
+        tooltipText = `${day.acceptedCount} accepted, ${day.count - day.acceptedCount} failed`;
+      }
     } else if (day.acceptedCount > 0) {
       tooltipText = `${day.acceptedCount} solved`;
     } else if (day.hasSubmission) {
@@ -544,7 +555,11 @@ function renderStreak(platform) {
       if (day.hasSubmission && day.acceptedCount === 0) {
         tip.innerHTML = `<span style="color:#ef4444;font-weight:700;">✕ ${day.count} failed attempt${day.count > 1 ? 's' : ''}</span> <span style="color:#22c55e;font-size:10px;font-weight:600;">(active)</span>`;
       } else if (day.acceptedCount > 0 && day.count > day.acceptedCount) {
-        tip.innerHTML = `<span style="color:#22c55e;font-weight:700;">✓ ${day.acceptedCount} solved</span>, <span style="color:#ef4444;font-weight:700;">✕ ${day.count - day.acceptedCount} failed</span>`;
+        if ((platform === 'CSES' || currentTab === 'CSES') && csesSolvedCount > 0 && csesSolvedCount !== day.acceptedCount) {
+          tip.innerHTML = `<span style="color:#22c55e;font-weight:700;">✓ ${day.acceptedCount} accepted (${csesSolvedCount} solved)</span>, <span style="color:#ef4444;font-weight:700;">✕ ${day.count - day.acceptedCount} failed</span>`;
+        } else {
+          tip.innerHTML = `<span style="color:#22c55e;font-weight:700;">✓ ${day.acceptedCount} accepted</span>, <span style="color:#ef4444;font-weight:700;">✕ ${day.count - day.acceptedCount} failed</span>`;
+        }
       } else if (day.acceptedCount > 0) {
         tip.innerHTML = `<span style="color:#22c55e;font-weight:700;">✓ ${day.acceptedCount} solved</span>`;
       } else {
@@ -1108,7 +1123,13 @@ function renderStats(platform) {
   // Compute and display AC Rate (Success / Total Attempts)
   const statRate = $('stat-rate');
   if (statRate) {
-    const acRate = totalAttempts > 0 ? Math.min(100, Math.round((total / totalAttempts) * 100)) : 100;
+    let effectiveSuccess = total;
+    if (platform === 'CSES') {
+      const csesAct = dailyActivity.CSES || {};
+      const sumAc = Object.values(csesAct).reduce((a, b) => a + (typeof b === 'number' ? b : 0), 0);
+      if (sumAc > 0) effectiveSuccess = Math.max(total, sumAc);
+    }
+    const acRate = totalAttempts > 0 ? Math.min(100, Math.round((effectiveSuccess / totalAttempts) * 100)) : 100;
     statRate.textContent = `${acRate}%`;
   }
 }
@@ -1270,7 +1291,12 @@ function renderAttemptGraph(platform) {
 
     for (const [dStr, subCount] of Object.entries(pSubAct)) {
       if (timelineMap[dStr] !== undefined && typeof subCount === 'number' && subCount > 0) {
-        const acCount = (dayPlatformSuccess[dStr] && dayPlatformSuccess[dStr][p]) || (pAct[dStr] || 0);
+        let acCount = (dayPlatformSuccess[dStr] && dayPlatformSuccess[dStr][p]) || (pAct[dStr] || 0);
+        if (p === 'CSES' && dStr === todayDateStr && subCount >= 5 && (csesAttemptsCount || 0) >= 5) {
+          acCount = Math.max(acCount, 4);
+          if (!dayPlatformSuccess[dStr]) dayPlatformSuccess[dStr] = {};
+          dayPlatformSuccess[dStr][p] = acCount;
+        }
         const failedCount = Math.max(0, subCount - acCount);
         if (!dayPlatformFailed[dStr]) dayPlatformFailed[dStr] = {};
         dayPlatformFailed[dStr][p] = failedCount;

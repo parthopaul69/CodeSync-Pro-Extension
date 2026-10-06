@@ -953,6 +953,7 @@
               taskId: verdict.taskId || '',
               verdict: verdict.result,
               title: verdict.taskTitle || '',
+              isAccepted: false,
               timestamp: Date.now()
             }
           });
