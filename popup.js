@@ -1603,7 +1603,12 @@ async function refreshStateAndUI() {
   tpStreak = data.tpStreak || 0;
   const uniqueCsesSolved = new Set(syncLog.filter(e => e.platform === 'CSES').map(e => e.problemCode || e.problemName)).size;
   csesSolvedCount = Math.max(data.csesSolvedCount || 0, uniqueCsesSolved);
-  csesAttemptsCount = Math.max(data.csesAttemptsCount || 0, csesSolvedCount);
+  let csesSubActivityCount = 0;
+  const csesSubAct = (dailySubmissionActivity && dailySubmissionActivity.CSES) || (dailyActivity && dailyActivity.CSES) || {};
+  for (const cnt of Object.values(csesSubAct)) {
+    csesSubActivityCount += (typeof cnt === 'number' ? cnt : 0);
+  }
+  csesAttemptsCount = Math.max(data.csesAttemptsCount || 0, csesSubActivityCount, csesSolvedCount);
   csesStreak = data.csesStreak || 0;
   cfOffset = data.cfOffset || null;
   acOffset = data.acOffset || null;
@@ -1819,7 +1824,12 @@ async function init() {
   tpContestCount = data.tpContestCount || 0;
   const uniqueCsesSolved = new Set(syncLog.filter(e => e.platform === 'CSES').map(e => e.problemCode || e.problemName)).size;
   csesSolvedCount = Math.max(data.csesSolvedCount || 0, uniqueCsesSolved);
-  csesAttemptsCount = Math.max(data.csesAttemptsCount || 0, csesSolvedCount);
+  let csesSubActivityCount = 0;
+  const csesSubAct = (dailySubmissionActivity && dailySubmissionActivity.CSES) || (dailyActivity && dailyActivity.CSES) || {};
+  for (const cnt of Object.values(csesSubAct)) {
+    csesSubActivityCount += (typeof cnt === 'number' ? cnt : 0);
+  }
+  csesAttemptsCount = Math.max(data.csesAttemptsCount || 0, csesSubActivityCount, csesSolvedCount);
   csesStreak = data.csesStreak || 0;
   cfAttemptsCount = data.cfAttemptsCount || 0;
   acAttemptsCount = data.acAttemptsCount || 0;

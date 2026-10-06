@@ -963,6 +963,22 @@
       // Verdict is ACCEPTED!
       injectSyncButton();
 
+      // Record accepted submission as an attempt too (every submission is an attempt!)
+      if (!recordedAttemptSubIds.has(subId)) {
+        recordedAttemptSubIds.add(subId);
+        chrome.runtime.sendMessage({
+          type: 'RECORD_CSES_ATTEMPT',
+          data: {
+            subId: subId,
+            taskId: verdict.taskId || '',
+            verdict: verdict.result,
+            title: verdict.taskTitle || '',
+            isAccepted: true,
+            timestamp: Date.now()
+          }
+        });
+      }
+
       if (hasSynced || syncedSubIds.has(subId) || isSyncingSubId === subId) {
         return;
       }
@@ -1152,9 +1168,57 @@
     });
   }
 
+  // ── 8.5. CSES User Profile & Official Submission Count Sync ───────────────
+  function detectAndSyncCSESUserProfile() {
+    try {
+      const userLink = document.querySelector('.controls a.account[href^="/user/"]') ||
+                       document.querySelector('a[href^="/user/"]');
+      if (!userLink) return;
+      const m = (userLink.getAttribute('href') || '').match(/\/user\/(\d+)/);
+      if (!m) return;
+      const userId = m[1];
+      const username = userLink.textContent.trim();
+
+      // Check if current page is the user profile page itself
+      if (window.location.pathname.startsWith(`/user/${userId}`)) {
+        const text = document.body.innerText || '';
+        const countMatch = text.match(/Submission count:\s*(\d+)/i);
+        if (countMatch) {
+          const count = parseInt(countMatch[1], 10);
+          if (!isNaN(count)) {
+            chrome.runtime.sendMessage({
+              type: 'UPDATE_CSES_PROFILE',
+              data: { userId, username, submissionCount: count }
+            }).catch(() => {});
+            return;
+          }
+        }
+      }
+
+      // If on any other CSES page, fetch user profile in background
+      fetch(`https://cses.fi/user/${userId}`)
+        .then(r => r.text())
+        .then(html => {
+          const match = html.match(/Submission count:<\/td>\s*<td[^>]*>\s*(\d+)/i) ||
+                        html.match(/Submission count:\s*(\d+)/i);
+          if (match) {
+            const count = parseInt(match[1], 10);
+            if (!isNaN(count)) {
+              chrome.runtime.sendMessage({
+                type: 'UPDATE_CSES_PROFILE',
+                data: { userId, username, submissionCount: count }
+              }).catch(() => {});
+            }
+          }
+        })
+        .catch(() => {});
+    } catch (e) {}
+  }
+
   // ── 9. Initialize ──────────────────────────────────────────────────────────
   setTimeout(injectIdeFloatingButton, 800);
   setTimeout(enhanceTaskPageSubmissions, 1000);
+  setTimeout(detectAndSyncCSESUserProfile, 500);
   watchResultPage();
 
 })();
