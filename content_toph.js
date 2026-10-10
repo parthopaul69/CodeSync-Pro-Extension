@@ -775,8 +775,48 @@
     });
   }
 
-  // ── Problem detection bridge for IDE/Side Panel / Smart Sync ────────────────
+  // ── Problem detection bridge & Audio for IDE/Side Panel / Smart Sync ──────
+  var lastContentSoundPlayTime = 0;
+  function playNotificationSound() {
+    var now = Date.now();
+    if (now - lastContentSoundPlayTime < 2500) return;
+    lastContentSoundPlayTime = now;
+    chrome.storage.local.get(['soundEnabled'], function(d) {
+      if (d && d.soundEnabled === false) return;
+      try {
+        var url = chrome.runtime.getURL('noti.mp3');
+        var audio = new Audio(url);
+        audio.volume = 1.0;
+        var p = audio.play();
+        if (p && p.catch) {
+          p.catch(function() {
+            try {
+              var AudioContextClass = window.AudioContext || window.webkitAudioContext;
+              if (!AudioContextClass) return;
+              var ctx = new AudioContextClass();
+              fetch(url)
+                .then(function(r) { return r.arrayBuffer(); })
+                .then(function(b) { return ctx.decodeAudioData(b); })
+                .then(function(buf) {
+                  var src = ctx.createBufferSource();
+                  src.buffer = buf;
+                  src.connect(ctx.destination);
+                  src.start(0);
+                }).catch(function() {});
+            } catch(e) {}
+          });
+        }
+      } catch(e) {}
+    });
+  }
+
   chrome.runtime.onMessage.addListener(function(msg, sender, sendResponse) {
+    if (msg.type === 'PLAY_SOUND') {
+      playNotificationSound();
+      sendResponse({ ok: true });
+      return false;
+    }
+
     if (msg.type === 'FETCH_URL' && msg.url) {
       fetch(msg.url, { credentials: 'include' })
         .then(function(resp) { return resp.text(); })
@@ -879,9 +919,12 @@
     if (isSubmissionPage()) {
       watchForVerdict();
       var verdict = getSubmissionVerdict();
-      if (verdict === 'Accepted') {
+      const isPending = (verdict === 'Queued' || verdict === 'Running' || verdict === 'Judging' || verdict === 'Waiting');
+      const isRecentSub = sessionStorage.getItem('toph_submitted') || sessionStorage.getItem('codesync_auto_submit');
+      if (verdict === 'Accepted' && isRecentSub) {
+        sessionStorage.removeItem('toph_submitted');
         handleAccepted();
-      } else {
+      } else if (isPending) {
         var pollCount = 0;
         var pollTimer = setInterval(function() {
           pollCount++;

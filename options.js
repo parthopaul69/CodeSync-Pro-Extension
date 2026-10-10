@@ -22,7 +22,7 @@ async function loadSettings() {
   const data = await chrome.storage.local.get([
     'cfHandle', 'acHandle', 'tpHandle', 'ghToken', 'ghOwner', 'ghRepo',
     'cfEnabled', 'acEnabled', 'lcEnabled', 'tpEnabled', 'csesEnabled', 'soundEnabled',
-    'langFilter', 'ghRepoPrivate',
+    'langFilter', 'ghRepoPrivate', 'autoUpdateStatsCard',
     'editorTheme', 'editorFontSize', 'vimMode', 'defaultLanguage',
     'execApi', 'execApiUrl', 'execApiKey', 'execTimeout',
     'contestPlatforms', 'clistApiKey', 'contestNotify', 'contestNotifyMins'
@@ -43,6 +43,8 @@ async function loadSettings() {
   $('tp-enabled').checked = data.tpEnabled !== false;
   if ($('cses-enabled')) $('cses-enabled').checked = data.csesEnabled !== false;
   $('sound-enabled').checked = data.soundEnabled !== false;
+  if ($('auto-update-stats-card')) $('auto-update-stats-card').checked = data.autoUpdateStatsCard !== false;
+  loadStatsCardPreview();
 
   // Preferences
   if (data.editorTheme) {
@@ -603,6 +605,86 @@ document.addEventListener('keydown', e => {
       else if (activeId === 'gh-owner' || activeId === 'gh-repo' || activeId === 'gh-token') $('save-btn').click();
       else $('pref-save-btn').click();
     }
+  }
+});
+
+// ─── Stats Card Settings & Preview ────────────────────────────────────────────
+async function loadStatsCardPreview() {
+  const preview = $('options-stats-card-preview');
+  const input = $('options-stats-embed-code');
+  if (preview) preview.innerHTML = '<div class="spinner"></div>';
+
+  try {
+    const res = await chrome.runtime.sendMessage({ type: 'GET_STATS_CARD_DATA' });
+    if (res && res.ok) {
+      if (preview) {
+        preview.innerHTML = res.svg.replace('<svg ', '<svg style="width:100%;max-width:550px;height:auto;display:block;border-radius:8px;" ');
+      }
+      if (input) {
+        input.value = res.embedCode || '';
+      }
+    } else {
+      if (preview) preview.innerHTML = '<span style="color:var(--text-secondary);font-size:12px;">Configure your GitHub repository to generate the card preview.</span>';
+    }
+  } catch (err) {
+    if (preview) preview.innerHTML = `<span style="color:var(--red);font-size:12px;">Error: ${err.message}</span>`;
+  }
+}
+
+$('auto-update-stats-card')?.addEventListener('change', async () => {
+  const checked = $('auto-update-stats-card').checked;
+  await chrome.storage.local.set({ autoUpdateStatsCard: checked });
+});
+
+$('options-copy-stats-code-btn')?.addEventListener('click', async () => {
+  const input = $('options-stats-embed-code');
+  if (!input || !input.value) return;
+  try {
+    await navigator.clipboard.writeText(input.value);
+    const btn = $('options-copy-stats-code-btn');
+    const orig = btn.innerHTML;
+    btn.innerHTML = '✓ Copied!';
+    setTimeout(() => { btn.innerHTML = orig; }, 2000);
+  } catch (err) {
+    input.select();
+    document.execCommand('copy');
+  }
+});
+
+$('options-push-card-btn')?.addEventListener('click', async () => {
+  const btn = $('options-push-card-btn');
+  const msg = $('options-push-card-msg');
+  if (!btn) return;
+  const origText = btn.innerHTML;
+  btn.disabled = true;
+  btn.innerHTML = 'Pushing to GitHub…';
+  if (msg) {
+    msg.className = 'status-msg loading';
+    msg.textContent = 'Generating vector SVG and committing codesync-stats.svg to GitHub…';
+  }
+
+  try {
+    const res = await chrome.runtime.sendMessage({ type: 'PUSH_STATS_CARD' });
+    if (res && res.ok) {
+      if (msg) {
+        msg.className = 'status-msg success';
+        msg.textContent = 'Successfully committed codesync-stats.svg to GitHub repository root!';
+      }
+      await loadStatsCardPreview();
+    } else {
+      if (msg) {
+        msg.className = 'status-msg error';
+        msg.textContent = res?.error || 'Failed to push stats card.';
+      }
+    }
+  } catch (err) {
+    if (msg) {
+      msg.className = 'status-msg error';
+      msg.textContent = err.message;
+    }
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = origText;
   }
 });
 

@@ -532,7 +532,7 @@ function renderStreak(platform) {
     } else if (day.acceptedCount > 0) {
       tooltipText = `${day.acceptedCount} solved`;
     } else if (day.hasSubmission) {
-      tooltipText = `${day.count} failed attempt${day.count > 1 ? 's' : ''} (active)`;
+      tooltipText = `${day.count} failed`;
     } else {
       tooltipText = day.isToday ? 'Solve today!' : 'Missed';
     }
@@ -542,7 +542,7 @@ function renderStreak(platform) {
       const tip = $('attempt-tooltip');
       if (!tip) return;
       if (day.hasSubmission && day.acceptedCount === 0) {
-        tip.innerHTML = `<span style="color:#ef4444;font-weight:700;">✕ ${day.count} failed attempt${day.count > 1 ? 's' : ''}</span> <span style="color:#22c55e;font-size:10px;font-weight:600;">(active)</span>`;
+        tip.innerHTML = `<span style="color:#ef4444;font-weight:700;">✕ ${day.count} failed</span>`;
       } else if (day.acceptedCount > 0 && day.count > day.acceptedCount) {
         tip.innerHTML = `<span style="color:#22c55e;font-weight:700;">✓ ${day.acceptedCount} accepted</span>, <span style="color:#ef4444;font-weight:700;">✕ ${day.count - day.acceptedCount} failed</span>`;
       } else if (day.acceptedCount > 0) {
@@ -919,6 +919,13 @@ function renderSyncList(platform) {
       return e.platform === platform;
     })
     .map(getFailedItemDetails);
+
+  // Sort filteredLog by timestamp descending so the most recent syncs are always first
+  filteredLog.sort((a, b) => {
+    const tA = new Date(a.syncedAt || a.submissionTime || 0).getTime();
+    const tB = new Date(b.syncedAt || b.submissionTime || 0).getTime();
+    return tB - tA;
+  });
 
   // Combine lists with failed items on top
   const combined = [...filteredFailed, ...filteredLog];
@@ -1457,6 +1464,11 @@ function renderHistoryModalList() {
   };
 
   const filteredLog = syncLog.filter(tabFilter);
+  filteredLog.sort((a, b) => {
+    const tA = new Date(a.syncedAt || a.submissionTime || 0).getTime();
+    const tB = new Date(b.syncedAt || b.submissionTime || 0).getTime();
+    return tB - tA;
+  });
   const filteredFailed = failedQueue.filter(tabFilter).map(getFailedItemDetails);
   const combined = [...filteredFailed, ...filteredLog];
 
@@ -1586,6 +1598,11 @@ async function refreshStateAndUI() {
     };
     syncLog.push(repEntry);
   }
+  syncLog.sort((a, b) => {
+    const tA = new Date(a.syncedAt || a.submissionTime || 0).getTime();
+    const tB = new Date(b.syncedAt || b.submissionTime || 0).getTime();
+    return tB - tA;
+  });
   totalSynced = data.totalSynced || 0;
   dailyActivity = getDailyActivity(data);
   dailySubmissionActivity = getDailySubmissionActivity(data);
@@ -1810,6 +1827,11 @@ async function init() {
     };
     syncLog.push(repEntry);
   }
+  syncLog.sort((a, b) => {
+    const tA = new Date(a.syncedAt || a.submissionTime || 0).getTime();
+    const tB = new Date(b.syncedAt || b.submissionTime || 0).getTime();
+    return tB - tA;
+  });
   totalSynced = data.totalSynced || 0;
   dailyActivity = getDailyActivity(data);
   dailySubmissionActivity = getDailySubmissionActivity(data);
@@ -1926,6 +1948,90 @@ async function init() {
   });
   $('quick-settings-btn')?.addEventListener('click', () => {
     chrome.runtime.openOptionsPage();
+  });
+
+  // Stats Card Modal
+  async function loadStatsCardModal() {
+    const preview = $('card-preview-container');
+    const input = $('card-embed-input');
+    if (preview) preview.innerHTML = '<div class="spinner"></div>';
+
+    try {
+      const res = await chrome.runtime.sendMessage({ type: 'GET_STATS_CARD_DATA' });
+      if (res && res.ok) {
+        if (preview) {
+          preview.innerHTML = res.svg.replace('<svg ', '<svg style="width:100%;height:auto;display:block;border-radius:6px;" ');
+        }
+        if (input) {
+          input.value = res.embedCode || '';
+        }
+      } else {
+        if (preview) preview.innerHTML = `<span style="color:var(--red);font-size:11px;">Failed to load stats card: ${res?.error || 'Unknown error'}</span>`;
+      }
+    } catch (err) {
+      if (preview) preview.innerHTML = `<span style="color:var(--red);font-size:11px;">Error: ${err.message}</span>`;
+    }
+  }
+
+  $('open-card-btn')?.addEventListener('click', () => {
+    const modal = $('card-modal');
+    if (modal) {
+      modal.style.display = 'flex';
+      loadStatsCardModal();
+    }
+  });
+
+  $('close-card-modal')?.addEventListener('click', () => {
+    const modal = $('card-modal');
+    if (modal) modal.style.display = 'none';
+  });
+
+  $('card-modal')?.addEventListener('click', (e) => {
+    if (e.target === $('card-modal')) {
+      $('card-modal').style.display = 'none';
+    }
+  });
+
+  $('copy-card-code-btn')?.addEventListener('click', async () => {
+    const input = $('card-embed-input');
+    if (!input || !input.value) return;
+    try {
+      await navigator.clipboard.writeText(input.value);
+      showToast('Markdown embed code copied to clipboard!', 'success');
+      const btn = $('copy-card-code-btn');
+      if (btn) {
+        const orig = btn.innerHTML;
+        btn.innerHTML = '✓ Copied!';
+        setTimeout(() => { btn.innerHTML = orig; }, 2000);
+      }
+    } catch (err) {
+      input.select();
+      document.execCommand('copy');
+      showToast('Copied to clipboard!', 'success');
+    }
+  });
+
+  $('push-card-btn')?.addEventListener('click', async () => {
+    const btn = $('push-card-btn');
+    if (!btn) return;
+    const origText = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<div class="spinner" style="width:14px;height:14px;border-width:2px;display:inline-block;vertical-align:middle;margin-right:6px;"></div> Pushing to GitHub...';
+
+    try {
+      const res = await chrome.runtime.sendMessage({ type: 'PUSH_STATS_CARD' });
+      if (res && res.ok) {
+        showToast('Stats card successfully pushed to GitHub!', 'success');
+        await loadStatsCardModal();
+      } else {
+        showToast(`Push failed: ${res?.error || 'Unknown error'}`);
+      }
+    } catch (err) {
+      showToast(`Error: ${err.message}`);
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = origText;
+    }
   });
 
   const repoLink = $('repo-link');
@@ -2072,14 +2178,58 @@ async function init() {
     renderHistoryModalList();
   });
 
+  let _lastPopupSoundPlayTime = 0;
+  function playNotificationSound() {
+    const now = Date.now();
+    if (now - _lastPopupSoundPlayTime < 2500) return;
+    _lastPopupSoundPlayTime = now;
+    if (soundEnabled === false) return;
+    try {
+      const url = chrome.runtime.getURL('noti.mp3');
+      const audio = new Audio(url);
+      audio.volume = 1.0;
+      const p = audio.play();
+      if (p && p.catch) {
+        p.catch(() => {
+          try {
+            const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+            if (!AudioContextClass) return;
+            const ctx = new AudioContextClass();
+            fetch(url)
+              .then(r => r.arrayBuffer())
+              .then(b => ctx.decodeAudioData(b))
+              .then(buf => {
+                const src = ctx.createBufferSource();
+                src.buffer = buf;
+                src.connect(ctx.destination);
+                src.start(0);
+              }).catch(() => {});
+          } catch(e) {}
+        });
+      }
+    } catch(e) {}
+  }
+
   chrome.runtime.onMessage.addListener((msg) => {
+    if (msg.type === 'PLAY_SOUND') {
+      playNotificationSound();
+    }
+    if (msg.type === 'SYNC_LOG_UPDATED') {
+      refreshStateAndUI().then(() => {
+        renderAll(currentTab);
+      }).catch(() => {});
+    }
     if (msg.type === 'SYNC_SUCCESS') {
       showToast(`[${msg.platform}] ${msg.problemCode} synced!`, 'success');
-      refreshStateAndUI().catch(() => {});
+      refreshStateAndUI().then(() => {
+        renderAll(currentTab);
+      }).catch(() => {});
     }
     if (msg.type === 'SYNC_ERROR') {
       showToast(`[${msg.platform}] ${msg.problemCode}: ${msg.error}`);
-      refreshStateAndUI().catch(() => {});
+      refreshStateAndUI().then(() => {
+        renderAll(currentTab);
+      }).catch(() => {});
     }
     if (msg.type === 'SMART_SYNC_PROGRESS') {
       handleSmartSyncProgress(msg);
@@ -2191,6 +2341,8 @@ async function init() {
 
         updateSmartSyncButton();
         renderFailedBanner();
+        await refreshStateAndUI();
+        renderAll(currentTab);
 
         // Auto-sync if "Fix Now" was clicked (math fix migration)
         if (autoSyncAfterScan && unsyncedItems.length > 0) {
@@ -2292,6 +2444,17 @@ async function init() {
   renderAll(currentTab);
   renderFailedBanner();
   updateSmartSyncButton();
+
+  // Auto-sync from GitHub to keep multiple devices in sync automatically
+  if (data.ghToken && data.ghOwner && data.ghRepo) {
+    chrome.runtime.sendMessage({ type: 'SYNC_FROM_GITHUB' }).then((res) => {
+      if (res && res.updated) {
+        refreshStateAndUI().then(() => {
+          renderAll(currentTab);
+        }).catch(() => {});
+      }
+    }).catch(() => {});
+  }
 
   // Query active background sync status
   chrome.runtime.sendMessage({ type: 'GET_SYNC_STATUS' }).then(async (status) => {

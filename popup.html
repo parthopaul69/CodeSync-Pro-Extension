@@ -558,6 +558,10 @@
       <span class="qb-icon">🏆</span>
       <span class="qb-label">Contests</span>
     </button>
+    <button class="quick-btn" id="open-card-btn" title="GitHub Profile README Stats Card">
+      <span class="qb-icon">📊</span>
+      <span class="qb-label">Stats Card</span>
+    </button>
   </div>
 
   <!-- Platform Tabs -->
@@ -736,6 +740,41 @@
   <!-- Branding Footer -->
   <div class="footer-branding">
     Having Issues? <a href="https://github.com/parthopaul69/CodeSync-Pro-Extension/issues" target="_blank">Report Bug</a> | Made with ❤️ by <a href="https://github.com/parthopaul69" target="_blank">@parthopaul69</a>
+  </div>
+
+  <!-- Stats Card Modal (hidden by default) -->
+  <div class="modal" id="card-modal" style="display:none">
+    <div class="modal-content" style="max-height: 90vh;">
+      <div class="modal-header">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span style="font-size:16px;">📊</span>
+          <h3 style="margin:0; font-size:14px; font-weight:900;">Profile README Stats Card</h3>
+        </div>
+        <button id="close-card-modal" class="close-btn">&times;</button>
+      </div>
+
+      <div style="font-size: 11px; color: var(--muted); margin-bottom: 12px; line-height: 1.4;">
+        Dynamic SVG card auto-synced to your GitHub solutions repository. Embed it anywhere on your GitHub Profile README.
+      </div>
+
+      <div id="card-preview-container" style="background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 10px; text-align: center; overflow: hidden; margin-bottom: 12px; min-height: 130px; display: flex; align-items: center; justify-content: center;">
+        <div class="spinner"></div>
+      </div>
+
+      <div style="display:flex; flex-direction:column; gap:6px; margin-bottom: 12px;">
+        <label style="font-size: 10px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px;">Markdown Embed Code</label>
+        <div style="display:flex; gap:6px;">
+          <input type="text" id="card-embed-input" readonly class="search-input" style="flex:1; font-family: monospace; font-size: 10px; padding: 6px 10px; margin-bottom:0;" />
+          <button id="copy-card-code-btn" class="quick-btn" style="flex: 0 0 70px; flex-direction: row; justify-content: center; height: 32px; padding: 0 8px; border-radius: 6px; background: var(--surface2); border: 1px solid var(--border); font-size: 10px; margin:0;">📋 Copy</button>
+        </div>
+      </div>
+
+      <div style="display:flex; gap:8px;">
+        <button id="push-card-btn" style="flex:1; padding: 9px; border: none; background: linear-gradient(135deg, #1f6feb, #2f81f7); color: #fff; border-radius: 8px; font-weight: 700; font-size: 11px; cursor: pointer; display:flex; align-items:center; justify-content:center; gap:6px; box-shadow: 0 2px 8px var(--accent-glow);">
+          <span>🚀 Push Card to GitHub</span>
+        </button>
+      </div>
+    </div>
   </div>
 
   <!-- Link Account/Repo Modal (hidden by default) -->

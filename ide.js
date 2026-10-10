@@ -115,7 +115,7 @@
         },
         quickSuggestionsDelay: 10,
         suggestOnTriggerCharacters: true,
-        wordBasedSuggestions: true,
+        wordBasedSuggestions: false,
         acceptSuggestionOnEnter: 'on',
         tabCompletion: 'on',
         snippetSuggestions: 'top',
@@ -318,11 +318,19 @@
         if (!reserved.has(match[1])) vars.add(match[1].trim());
       }
 
-      // 4. General word tokens that appear as identifiers in the code
-      const words = cleanText.match(/\b[a-zA-Z_]\w*\b/g) || [];
-      for (const w of words) {
-        if (!reserved.has(w) && w.length >= 1 && w.length <= 40 && !/^\d+$/.test(w)) {
-          vars.add(w);
+      // 4. Function parameters in signatures: (int n, int m)
+      const paramRegex = /\(([^)]+)\)/g;
+      let pMatch;
+      while ((pMatch = paramRegex.exec(cleanText)) !== null) {
+        const parts = pMatch[1].split(',');
+        for (let part of parts) {
+          const tokens = part.trim().split(/\s+/);
+          if (tokens.length >= 2) {
+            const pName = tokens[tokens.length - 1].replace(/^[*&]/, '').trim();
+            if (pName && /^[a-zA-Z_]\w*$/.test(pName) && !reserved.has(pName)) {
+              vars.add(pName);
+            }
+          }
         }
       }
 
@@ -498,10 +506,10 @@
             }
 
             // ── Case D: User Variables in General Code (Inside Functions) ──
-            if (!isDotOrArrow && !isPreprocessor) {
+            if (!isDotOrArrow && !isPreprocessor && currentWord.length > 0) {
               const userVars = extractDocumentVariables(model, langKey);
               userVars.forEach(v => {
-                if (currentWord && !v.toLowerCase().startsWith(currentWord)) return;
+                if (!v.toLowerCase().startsWith(currentWord)) return;
                 suggestions.push({
                   label: v,
                   kind: monaco.languages.CompletionItemKind.Variable,
@@ -538,7 +546,10 @@
                 let isPrefixMatch = false;
 
                 if (currentWord.length === 0) {
-                  isMatch = true;
+                  // Only allow empty prefix if explicit trigger context (. or -> or # or ::)
+                  if (isDotOrArrow || isPreprocessor || isScope) {
+                    isMatch = true;
+                  }
                 } else {
                   const labelLower = item.label.toLowerCase();
                   if (labelLower.startsWith(currentWord)) {
@@ -563,6 +574,7 @@
                 const priority = typeof item.priority === 'number' ? item.priority : 2;
                 const sortPrefix = (isPrefixMatch ? '0' : '1') + priority + '_';
                 const sortText = sortPrefix + item.label;
+                const filterText = item.acronym ? `${item.label} ${item.acronym}` : item.label;
 
                 suggestions.push({
                   label: item.label,
@@ -570,7 +582,7 @@
                   detail: item.detail || '',
                   documentation: item.documentation || item.detail || item.label,
                   insertText: item.insertText,
-                  filterText: item.label,
+                  filterText: filterText,
                   sortText: sortText,
                   insertTextRules: item.insertText && item.insertText.includes('${')
                     ? monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet
@@ -579,7 +591,7 @@
                 });
 
                 // Dedicated alias suggestion when acronym is defined and matches
-                if (item.acronym && !isDotOrArrow && currentWord.length > 0) {
+                if (item.acronym && currentWord.length > 0) {
                   if (item.acronym.toLowerCase().startsWith(currentWord)) {
                     suggestions.push({
                       label: item.acronym,
@@ -603,10 +615,10 @@
             const cpSnippetsSource = (typeof CP_SNIPPETS !== 'undefined' ? CP_SNIPPETS : (window.CP_SNIPPETS || {}));
             const langSnippets = cpSnippetsSource[langKey] || [];
 
-            if (!isDotOrArrow && !isScope && !isGlobalScope && Array.isArray(langSnippets)) {
+            if (!isDotOrArrow && !isScope && !isGlobalScope && Array.isArray(langSnippets) && currentWord.length > 0) {
               langSnippets.forEach(snip => {
                 const prefixLower = snip.prefix.toLowerCase();
-                const matchesPrefix = currentWord.length === 0 || prefixLower.startsWith(currentWord);
+                const matchesPrefix = prefixLower.startsWith(currentWord);
                 if (!matchesPrefix) return;
 
                 suggestions.push({
@@ -624,11 +636,11 @@
             }
 
             // ── Case G: User Custom Snippets ──
-            if (!isDotOrArrow && !isScope && Array.isArray(userCustomSnippets)) {
+            if (!isDotOrArrow && !isScope && Array.isArray(userCustomSnippets) && currentWord.length > 0) {
               userCustomSnippets.forEach(snip => {
                 if (snip.language && snip.language !== langKey && snip.language !== 'all') return;
                 const prefixLower = (snip.prefix || '').toLowerCase();
-                const matchesPrefix = currentWord.length === 0 || prefixLower.startsWith(currentWord);
+                const matchesPrefix = prefixLower.startsWith(currentWord);
                 if (!matchesPrefix) return;
 
                 suggestions.push({
@@ -2922,9 +2934,45 @@
     return false;
   }
 
+  let _lastIdeSoundPlayTime = 0;
+  function playNotificationSound() {
+    const now = Date.now();
+    if (now - _lastIdeSoundPlayTime < 2500) return;
+    _lastIdeSoundPlayTime = now;
+    chrome.storage.local.get(['soundEnabled'], (d) => {
+      if (d && d.soundEnabled === false) return;
+      try {
+        const url = chrome.runtime.getURL('noti.mp3');
+        const audio = new Audio(url);
+        audio.volume = 1.0;
+        const p = audio.play();
+        if (p && p.catch) {
+          p.catch(() => {
+            try {
+              const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+              if (!AudioContextClass) return;
+              const ctx = new AudioContextClass();
+              fetch(url)
+                .then(r => r.arrayBuffer())
+                .then(b => ctx.decodeAudioData(b))
+                .then(buf => {
+                  const src = ctx.createBufferSource();
+                  src.buffer = buf;
+                  src.connect(ctx.destination);
+                  src.start(0);
+                }).catch(() => {});
+            } catch(e) {}
+          });
+        }
+      } catch(e) {}
+    });
+  }
+
   // Listen for runtime messages to load problem or reset to scratchpad dynamically
   chrome.runtime.onMessage.addListener((msg) => {
-    if (msg.type === 'LOAD_PROBLEM' && msg.data) {
+    if (msg.type === 'PLAY_SOUND') {
+      playNotificationSound();
+    } else if (msg.type === 'LOAD_PROBLEM' && msg.data) {
       if (msg.data.platform === 'LC' || msg.data.platform === 'TP') return;
       loadProblemData(msg.data);
       showToast(`Loaded problem: ${msg.data.title || 'Active Problem'}`, 'success');

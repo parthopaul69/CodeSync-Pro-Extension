@@ -133,28 +133,45 @@ function parseACSubmission(html) {
   return { code, timeMs, memoryKb };
 }
 
+let offscreenAudioCtx = null;
+
 function playNotiMp3() {
   try {
-    const audio = new Audio(chrome.runtime.getURL('noti.mp3'));
-    audio.volume = 0;
-
-    audio.play().then(() => {
-      const totalSteps = 20;
-      let currentStep = 0;
-      const intervalMs = 20;
-
-      const fadeInterval = setInterval(() => {
-        currentStep++;
-        audio.volume = Math.min(1.0, currentStep / totalSteps);
-        if (currentStep >= totalSteps) {
-          clearInterval(fadeInterval);
-        }
-      }, intervalMs);
-    }).catch(err => {
-      console.error('[CodeSync] noti.mp3 failed to play:', err);
-    });
+    const url = chrome.runtime.getURL('noti.mp3');
+    const audio = new Audio(url);
+    audio.volume = 1.0;
+    const playPromise = audio.play();
+    if (playPromise !== undefined) {
+      playPromise.catch(err => {
+        console.warn('[CodeSync] HTML5 audio.play() failed in offscreen, trying Web Audio API:', err);
+        playViaWebAudio(url);
+      });
+    }
   } catch (e) {
-    console.error('[CodeSync] Audio error:', e);
+    console.warn('[CodeSync] HTML5 audio error in offscreen:', e);
+    playViaWebAudio(chrome.runtime.getURL('noti.mp3'));
+  }
+}
+
+async function playViaWebAudio(url) {
+  try {
+    if (!offscreenAudioCtx || offscreenAudioCtx.state === 'closed') {
+      const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+      if (!AudioContextClass) return;
+      offscreenAudioCtx = new AudioContextClass();
+    }
+    if (offscreenAudioCtx.state === 'suspended') {
+      await offscreenAudioCtx.resume();
+    }
+    const res = await fetch(url);
+    const buf = await res.arrayBuffer();
+    const audioBuffer = await offscreenAudioCtx.decodeAudioData(buf);
+    const source = offscreenAudioCtx.createBufferSource();
+    source.buffer = audioBuffer;
+    source.connect(offscreenAudioCtx.destination);
+    source.start(0);
+  } catch (err) {
+    console.error('[CodeSync] Web Audio playback failed in offscreen:', err);
   }
 }
 

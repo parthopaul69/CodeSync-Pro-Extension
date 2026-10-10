@@ -501,9 +501,49 @@
     }
   } catch (e) {}
 
-  // ── 6. Message Listener for IDE Communication & Scraping Relay ─────────────
+  // ── 6. Message Listener for IDE Communication, Scraping Relay & Audio ────────
+  let lastContentSoundPlayTime = 0;
+  function playNotificationSound() {
+    const now = Date.now();
+    if (now - lastContentSoundPlayTime < 2500) return;
+    lastContentSoundPlayTime = now;
+    chrome.storage.local.get(['soundEnabled'], (d) => {
+      if (d && d.soundEnabled === false) return;
+      try {
+        const url = chrome.runtime.getURL('noti.mp3');
+        const audio = new Audio(url);
+        audio.volume = 1.0;
+        const p = audio.play();
+        if (p && p.catch) {
+          p.catch(() => {
+            try {
+              const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+              if (!AudioContextClass) return;
+              const ctx = new AudioContextClass();
+              fetch(url)
+                .then(r => r.arrayBuffer())
+                .then(b => ctx.decodeAudioData(b))
+                .then(buf => {
+                  const src = ctx.createBufferSource();
+                  src.buffer = buf;
+                  src.connect(ctx.destination);
+                  src.start(0);
+                }).catch(() => {});
+            } catch(e) {}
+          });
+        }
+      } catch(e) {}
+    });
+  }
+
   if (isContextValid()) {
     chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+      if (message.type === 'PLAY_SOUND') {
+        playNotificationSound();
+        sendResponse({ ok: true });
+        return false;
+      }
+
       if (message.type === 'FETCH_URL' && message.url) {
         fetch(message.url, { credentials: 'include' })
           .then(async (response) => {
@@ -1075,6 +1115,28 @@
         link.dataset.codesyncEnhanced = 'true';
 
         const isSynced = syncLog.some(e => e.platform === 'CSES' && String(e.subId) === String(subId));
+
+        // Find the verdict/score icon element for this submission
+        const scoreEl = link.querySelector('.task-score') ||
+                        (link.parentElement ? link.parentElement.querySelector('.task-score') : null);
+
+        let isAcceptedSub = isSynced;
+        if (scoreEl) {
+          const cls = scoreEl.className || '';
+          if (/\bfull\b|\bc100\b/i.test(cls)) {
+            isAcceptedSub = true;
+          } else if (/\bzero\b|\bc0\b|\bcompile-err\b|\bsystem-err\b/i.test(cls)) {
+            isAcceptedSub = false;
+          }
+        } else {
+          const rowText = (link.parentElement ? link.parentElement.innerText : link.innerText) || '';
+          if (/✕|✗|failed/i.test(rowText)) {
+            isAcceptedSub = false;
+          }
+        }
+
+        // Never inject sync button on failed submissions!
+        if (!isAcceptedSub) return;
 
         const badge = document.createElement('span');
         badge.style.cssText = [

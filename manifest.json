@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "CodeSync Pro",
-  "version": "4.1.0",
-  "description": "All-in-one Competitive Programming Workstation — syncs solutions to GitHub from Codeforces, AtCoder, CSES, LeetCode & Toph with built-in IDE, testcase runner, and contest tracker.",
+  "version": "4.2.0",
+  "description": "All-in-one Competitive Programming Workstation — syncs solutions to GitHub from Codeforces, AtCoder, CSES, LeetCode & Toph with dynamic Profile README stats cards, built-in IDE, testcase runner, and contest tracker.",
   "permissions": [
     "storage",
     "alarms",

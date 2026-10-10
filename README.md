@@ -50,6 +50,7 @@
     - [C. Starter Templates & Boilerplates (`settings_starter_templates.png`)](#c-starter-templates--boilerplates-settings_starter_templatespng)
     - [D. Remote Code Execution Engine (`settings_code_execution.png`)](#d-remote-code-execution-engine-settings_code_executionpng)
     - [E. Contest Hub Filters & Reminders (`settings_contest_hub_filters.png`)](#e-contest-hub-filters--reminders-settings_contest_hub_filterspng)
+    - [F. Dynamic GitHub Profile README Stats Card](#f-dynamic-github-profile-readme-stats-card)
   - [5. Automated GitHub Synchronization Architecture](#5-automated-github-synchronization-architecture)
     - [A. Repository Root Directory Architecture (`github_repo_structure.png`)](#a-repository-root-directory-architecture-github_repo_structurepng)
     - [B. Codeforces Division Hierarchy (`github_codeforces_divisions.png`)](#b-codeforces-division-hierarchy-github_codeforces_divisionspng)
@@ -68,6 +69,7 @@
   - [5. CPH Multi-Testcase Runner & Telemetry](#5-cph-multi-testcase-runner--telemetry)
   - [6. Automated GitHub Synchronization & Repository Hierarchy](#6-automated-github-synchronization--repository-hierarchy)
   - [7. Judge DOM Scraping & One-Click Auto-Submit Bridges](#7-judge-dom-scraping--one-click-auto-submit-bridges)
+  - [8. Dynamic GitHub Profile README Stats Card Engine](#8-dynamic-github-profile-readme-stats-card-engine)
 - [🌐 Browser Compatibility (Google Chrome & Microsoft Edge)](#-browser-compatibility-google-chrome--microsoft-edge)
 - [🚀 Installation & Quick Start Guide](#-installation--quick-start-guide)
 - [⚙️ Configuration & GitHub Setup](#️-configuration--github-setup)
@@ -520,9 +522,10 @@ This directory exhaustively details every button, dropdown, and control built in
 
 | Button / Control | Visual Label / Icon | Location | Action & Technical Behavior |
 | :--- | :--- | :--- | :--- |
-| **IDE Workstation Launcher** | `⚡ IDE` | Popup Header | Opens the full-screen Monaco CP Workstation (`ide.html`) in a new browser tab. |
-| **Contests Launcher** | `🏆 CONTESTS` | Popup Header | Opens the full-screen Contest Hub and Upsolve Radar page (`contests.html`). |
-| **Platform Segment Filters** | `ALL`, `CF`, `AC`, `LC`, `TP` | Stats Card | Filters the stats overview and 30-day submission graph to the selected judge platform. |
+| **IDE Workstation Launcher** | `⚡ IDE` | Quick Actions Bar | Opens the full-screen Monaco CP Workstation (`ide.html`) in a new browser tab. |
+| **Contests Launcher** | `🏆 Contests` | Quick Actions Bar | Opens the full-screen Contest Hub and Upsolve Radar page (`contests.html`). |
+| **Stats Card Launcher** | `📊 Stats Card` | Quick Actions Bar | Opens the Profile README Stats Card modal with live SVG preview, markdown snippet copy, and 1-click GitHub push. |
+| **Platform Segment Filters** | `ALL`, `CF`, `AC`, `CSES`, `LC`, `TP` | Platform Tabs Bar | Filters recent sync history and stats overview to the selected platform. |
 | **Scan Unsynced Button** | `🔍 Scan Unsynced` | Smart Sync Center | Queries platform APIs to detect un-archived solutions not present in GitHub. |
 | **Sync Unsynced Solutions** | `⚡ Sync Unsynced Solutions` | Smart Sync Center | Initiates one-click batch upload of detected solutions to your configured GitHub repository. |
 | **Settings Gear** | `⚙️` | Header Right | Opens the glassmorphic Settings & Preferences page (`options.html`). |
@@ -536,6 +539,9 @@ This directory exhaustively details every button, dropdown, and control built in
 | :--- | :--- | :--- | :--- |
 | **Save & Test Connection** | `💾 Save & Test Connection` | GitHub Card | Validates Personal Access Token and verifies repository write permissions. |
 | **Create Repository** | `✨ Create` | GitHub Card | Automatically provisions a new public or private repository via the GitHub REST API. |
+| **Auto-update Stats Card** | Toggle Switch | Stats Card Settings | Automatically commits updated `codesync-stats.svg` to GitHub on every accepted solve. |
+| **Copy Markdown Snippet** | `📋 Copy Markdown` | Stats Card Settings | Copies the formatted markdown embed link to paste into your GitHub profile `README.md`. |
+| **Push Stats Card Now** | `🚀 Push Stats Card Now` | Stats Card Settings | Generates vector SVG client-side and commits `codesync-stats.svg` immediately to GitHub. |
 | **Save Preferences** | `💾 Save Preferences` | Preferences Card | Persists editor theme, font size, Vim mode, and audio preferences to `chrome.storage.local`. |
 | **Reset Templates** | `↺ Reset to Defaults` | Templates Card | Restores original factory competitive programming starter templates. |
 | **Add Custom Template** | `+ Add Custom Template` | Templates Card | Opens a modal to define custom language boilerplate code and compilation flags. |
@@ -661,6 +667,37 @@ your-repo/
 
 ---
 
+### 8. Dynamic GitHub Profile README Stats Card Engine
+
+Turn your competitive programming grind into a live, interactive vector showcase! CodeSync Pro generates and commits a dynamic, high-resolution SVG stats card (`codesync-stats.svg`) directly to your solutions repository root.
+
+Embed it directly on your personal **GitHub Profile README** (`github.com/<username>/<username>`) or inside your solutions portfolio.
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/parthopaul69/Pri8899/main/codesync-stats.svg" alt="CodeSync Pro Dynamic Profile Stats Card" width="495" />
+</p>
+
+#### 📌 How to Embed on Your GitHub Profile README
+
+Add this single line to your `README.md` on GitHub:
+
+```markdown
+[![CodeSync Pro Stats](https://raw.githubusercontent.com/<YOUR_GITHUB_USERNAME>/<YOUR_SOLUTIONS_REPO>/main/codesync-stats.svg)](https://github.com/<YOUR_GITHUB_USERNAME>/<YOUR_SOLUTIONS_REPO>)
+```
+
+Replace `<YOUR_GITHUB_USERNAME>` and `<YOUR_SOLUTIONS_REPO>` with your actual repository details (or copy the one-click snippet directly from the CodeSync Pro Popup or Settings page!).
+
+#### ✨ Key Features of the Dynamic Stats Card:
+- **Zero Third-Party Servers / 100% Native SVG:** Rendered entirely client-side and committed directly to your repository via the GitHub REST API. No downtime, no rate limits, and zero external tracking.
+- **Cross-Platform Aggregation:** Displays total solved counts across **Codeforces**, **CSES**, **AtCoder**, **LeetCode**, and **Toph**.
+- **Real-Time Streak Tracker:** Displays your current active solving streak with flame indicator.
+- **AC Accuracy Rate & Submissions:** Computes real submission efficiency and dual-series metrics.
+- **Segmented Visual Distribution Bar:** Proportional multi-platform progress bar with platform signature highlights.
+- **Automatic Background Sync:** Updates automatically on every accepted solve across any supported platform with smart debouncing.
+- **1-Click Manual Push & Preview:** Live preview inside the extension Popup (`📊 Stats Card` button) and Settings tab with an immediate `🚀 Push Card to GitHub` trigger.
+
+---
+
 ## 🌐 Browser Compatibility (Google Chrome & Microsoft Edge)
 
 CodeSync Pro is built on the standard **Manifest V3** specification and fully tested on:
@@ -679,7 +716,7 @@ CodeSync Pro is built on the standard **Manifest V3** specification and fully te
 ### Step 1: Clone or Download the Repository
 
 ```bash
-git clone https://github.com/imposter-bho0/codesync-pro.git
+git clone https://github.com/parthopaul69/CodeSync-Pro-Extension.git
 ```
 
 ### Step 2: Load Extension in Chrome / Edge

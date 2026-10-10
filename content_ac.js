@@ -533,12 +533,52 @@
     observer.observe(document.body, { childList: true, subtree: true });
   } catch (e) {}
 
-  // ── FETCH_URL relay — allows background to use this tab for fetching ───────
+  // ── Audio & FETCH_URL relay ──────────────────────────────────────────────
+  let lastContentSoundPlayTime = 0;
+  function playNotificationSound() {
+    const now = Date.now();
+    if (now - lastContentSoundPlayTime < 2500) return;
+    lastContentSoundPlayTime = now;
+    chrome.storage.local.get(['soundEnabled'], (d) => {
+      if (d && d.soundEnabled === false) return;
+      try {
+        const url = chrome.runtime.getURL('noti.mp3');
+        const audio = new Audio(url);
+        audio.volume = 1.0;
+        const p = audio.play();
+        if (p && p.catch) {
+          p.catch(() => {
+            try {
+              const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+              if (!AudioContextClass) return;
+              const ctx = new AudioContextClass();
+              fetch(url)
+                .then(r => r.arrayBuffer())
+                .then(b => ctx.decodeAudioData(b))
+                .then(buf => {
+                  const src = ctx.createBufferSource();
+                  src.buffer = buf;
+                  src.connect(ctx.destination);
+                  src.start(0);
+                }).catch(() => {});
+            } catch(e) {}
+          });
+        }
+      } catch(e) {}
+    });
+  }
+
   try {
     if (isContextValid()) {
       chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         try {
           if (!isContextValid()) return;
+          if (message.type === 'PLAY_SOUND') {
+            playNotificationSound();
+            sendResponse({ ok: true });
+            return false;
+          }
+
           if (message.type === 'FETCH_URL') {
             fetch(message.url, { credentials: 'include' })
               .then(async (response) => {
@@ -702,6 +742,8 @@
   }
 
   function injectIdeFloatingButton() {
+    const path = window.location.pathname;
+    if (!/\/contests\/[^/]+\/tasks\/[^/]+/.test(path)) return;
     if (!document.getElementById('task-statement') || document.getElementById('codesync-ide-btn')) return;
 
     const btn = document.createElement('div');
